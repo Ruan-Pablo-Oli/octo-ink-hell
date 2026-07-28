@@ -1,0 +1,25 @@
+# Godot 4+ specific ignores
+.godot/
+/android/
+
+# Exported builds
+build/
+export/
+*.exe
+*.pck
+*.x86_64
+*.apk
+*.aab
+*.dmg
+*.zip
+
+# Export credentials (contains keystore passwords / API keys)
+export_credentials.cfg
+
+# Editor / OS junk
+.DS_Store
+Thumbs.db
+*~
+*.swp
+.idea/
+.vscode/
