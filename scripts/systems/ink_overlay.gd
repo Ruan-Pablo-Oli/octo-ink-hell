@@ -16,7 +16,11 @@ const WiperCursorScript := preload("res://scripts/effects/wiper_cursor.gd")
 var _container: Node2D
 var _cursor: Node2D
 var _splats: Array = []  # [{ node, dirt }] oldest first
-var _dirtiness: float = 0.0
+## Unclamped sum of the live splats' dirt. Kept unclamped on purpose: clamping it
+## on the way up would make each wipe subtract dirt that was never counted, so a
+## saturated screen could read 0% while still caked in ink. Only the reported
+## value is clamped to 0..1.
+var _dirt_total: float = 0.0
 var _clean_mode: bool = false
 
 
@@ -67,11 +71,12 @@ func _on_shot_fired(direction: Vector2, weapon: WeaponData) -> void:
 	splat.setup(direction.angle(), weapon)
 
 	_splats.append({"node": splat, "dirt": weapon.splat_dirtiness})
-	_dirtiness = clampf(_dirtiness + weapon.splat_dirtiness, 0.0, 1.0)
-	GameEvents.screen_dirtiness_changed.emit(_dirtiness)
+	_dirt_total += weapon.splat_dirtiness
 
 	if _splats.size() > MAX_SPLATS:
-		_remove_oldest(1)
+		_remove_oldest(1)  # emits the new dirtiness itself
+	else:
+		_emit_dirtiness()
 
 
 ## Wipes every stain whose centre is within `radius` of `screen_pos` and returns
@@ -83,7 +88,7 @@ func wipe_at(screen_pos: Vector2, radius: float) -> int:
 	for entry in _splats:
 		var node: Node2D = entry.node
 		if is_instance_valid(node) and node.position.distance_to(screen_pos) <= radius:
-			_dirtiness = clampf(_dirtiness - entry.dirt, 0.0, 1.0)
+			_dirt_total = maxf(0.0, _dirt_total - entry.dirt)
 			var tw := node.create_tween()
 			tw.tween_property(node, "modulate:a", 0.0, 0.15)
 			tw.tween_callback(node.queue_free)
@@ -92,7 +97,7 @@ func wipe_at(screen_pos: Vector2, radius: float) -> int:
 			remaining.append(entry)
 	_splats = remaining
 	if wiped > 0:
-		GameEvents.screen_dirtiness_changed.emit(_dirtiness)
+		_emit_dirtiness()
 	return wiped
 
 
@@ -100,13 +105,23 @@ func stop_wiping() -> void:
 	_cursor.wiping = false
 
 
+## Keeps the squeegee's drawn ring honest about the Player's actual wipe radius.
+func set_wipe_radius(radius: float) -> void:
+	_cursor.radius = radius
+	_cursor.queue_redraw()
+
+
 func _remove_oldest(count: int) -> void:
 	for i in count:
 		if _splats.is_empty():
 			break
 		var entry: Dictionary = _splats.pop_front()
-		_dirtiness = clampf(_dirtiness - entry.dirt, 0.0, 1.0)
+		_dirt_total = maxf(0.0, _dirt_total - entry.dirt)
 		var node: Node2D = entry.node
 		if is_instance_valid(node):
 			node.queue_free()
-	GameEvents.screen_dirtiness_changed.emit(_dirtiness)
+	_emit_dirtiness()
+
+
+func _emit_dirtiness() -> void:
+	GameEvents.screen_dirtiness_changed.emit(clampf(_dirt_total, 0.0, 1.0))

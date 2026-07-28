@@ -1,6 +1,8 @@
 extends Area2D
-## Bioluminescent droplet dropped by enemies. Walking over it wipes a chunk of
-## the screen ink (see InkOverlay) and refills ink / a little HP.
+## Bioluminescent droplet dropped by enemies. Walking over it refuels the
+## squeegee's cleaning fluid (the only way to refill it), tops up ink and heals a
+## little. It does NOT wipe the screen by itself — wiping is always active,
+## done by the player with the squeegee (see InkOverlay.wipe_at).
 
 var _t: float = 0.0
 

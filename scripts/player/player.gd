@@ -65,7 +65,7 @@ func _ready() -> void:
 	add_child(cam)
 	cam.make_current()
 
-	_overlay = get_tree().get_first_node_in_group("ink_overlay")
+	_get_overlay()
 	GameEvents.cleaning_collected.connect(func() -> void: _heal(5.0))
 	call_deferred("_emit_initial")
 
@@ -122,23 +122,34 @@ func _set_tool(next_tool: Tool) -> void:
 	_tool = next_tool
 	var cleaning := next_tool == Tool.CLEAN
 	GameEvents.clean_mode_changed.emit(cleaning)
+	if cleaning:
+		# Push the real radius so the drawn ring matches what wipe_at() will catch.
+		var ov := _get_overlay()
+		if ov:
+			ov.set_wipe_radius(wipe_radius)
 	# Literally swap the mouse for the squeegee: hide the OS cursor in clean mode
 	# (the InkOverlay draws the squeegee there instead).
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN if cleaning else Input.MOUSE_MODE_VISIBLE
 
 
 func _wipe() -> void:
-	if _overlay == null:
-		_overlay = get_tree().get_first_node_in_group("ink_overlay")
-		if _overlay == null:
-			return
+	var ov := _get_overlay()
+	if ov == null:
+		return
 	if cleaner.current <= 0.0:
-		_overlay.stop_wiping()
+		ov.stop_wiping()
 		return
 	var pos := get_viewport().get_mouse_position()
-	var wiped: int = _overlay.wipe_at(pos, wipe_radius)
+	var wiped: int = ov.wipe_at(pos, wipe_radius)
 	if wiped > 0:
 		cleaner.consume(wiped * wipe_cost)
+
+
+## The overlay is built by main.gd, so look it up lazily and survive a reload.
+func _get_overlay() -> Node:
+	if _overlay == null or not is_instance_valid(_overlay):
+		_overlay = get_tree().get_first_node_in_group("ink_overlay")
+	return _overlay
 
 
 func take_damage(amount: float) -> void:
