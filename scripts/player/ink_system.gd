@@ -8,19 +8,42 @@ class_name InkSystem
 @export var regen_per_sec: float = 7.0
 @export var regen_delay: float = 0.6
 
+## Set by the Player. Upgrades scale capacity and regen (Extra Gland).
+var upgrades: UpgradeSystem
+
 var current: float
 var _since_use: float = 0.0
+var _eff_max: float
+var _eff_regen: float
 
 
 func _ready() -> void:
+	_eff_max = max_ink
+	_eff_regen = regen_per_sec
 	current = max_ink
 	GameEvents.cleaning_collected.connect(func() -> void: refill(15.0))
+	GameEvents.upgrades_changed.connect(recompute)
+
+
+func recompute() -> void:
+	if upgrades == null:
+		return
+	const S := UpgradeEffect.Stat
+	var new_max := upgrades.value(S.INK_MAX, max_ink)
+	# Extra capacity arrives full, so the upgrade feels like a reward rather than
+	# an empty tank you have to regenerate into.
+	if new_max > _eff_max:
+		current += new_max - _eff_max
+	_eff_max = new_max
+	current = minf(current, _eff_max)
+	_eff_regen = upgrades.value(S.INK_REGEN, regen_per_sec)
+	_broadcast()
 
 
 func _process(delta: float) -> void:
 	_since_use += delta
-	if _since_use >= regen_delay and current < max_ink:
-		current = minf(max_ink, current + regen_per_sec * delta)
+	if _since_use >= regen_delay and current < _eff_max:
+		current = minf(_eff_max, current + _eff_regen * delta)
 		_broadcast()
 
 
@@ -37,7 +60,7 @@ func consume(amount: float) -> bool:
 
 
 func refill(amount: float) -> void:
-	current = minf(max_ink, current + amount)
+	current = minf(_eff_max, current + amount)
 	_broadcast()
 
 
@@ -46,4 +69,4 @@ func broadcast() -> void:
 
 
 func _broadcast() -> void:
-	GameEvents.ink_changed.emit(current, max_ink)
+	GameEvents.ink_changed.emit(current, _eff_max)

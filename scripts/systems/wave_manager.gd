@@ -4,6 +4,8 @@ extends Node
 ## the roguelite upgrade screen later (see README "Next steps").
 
 const SwarmerScene := preload("res://scenes/enemies/swarmer.tscn")
+## Keeps spawns off the wall itself.
+const SPAWN_MARGIN := 60.0
 
 @export var base_count: int = 6
 @export var per_wave: int = 3
@@ -17,11 +19,13 @@ var _alive: int = 0
 var _to_spawn: int = 0
 var _spawn_timer: float = 0.0
 var _running: bool = false
+var _awaiting_upgrade: bool = false
 var _player: Node2D
 
 
 func _ready() -> void:
 	GameEvents.enemy_killed.connect(_on_enemy_killed)
+	GameEvents.upgrade_selected.connect(_on_upgrade_selected)
 	_player = get_tree().get_first_node_in_group("player")
 	_start_next_wave()
 
@@ -54,16 +58,53 @@ func _spawn_one() -> void:
 	if entities == null:
 		entities = get_tree().current_scene
 	var e := SwarmerScene.instantiate()
-	var ang := randf() * TAU
-	var dist := randf_range(spawn_min_dist, spawn_max_dist)
-	e.global_position = _player.global_position + Vector2.RIGHT.rotated(ang) * dist
 	entities.add_child(e)
+	e.global_position = _spawn_position()
+
+
+## Picks a spot to drop an enemy: on a ring around the player, but inside the
+## arena walls. Cornering the player makes most of that ring fall outside the
+## tank, so we fall back to any far-enough point in the arena rather than
+## clamping onto the wall right next to them.
+func _spawn_position() -> Vector2:
+	var arena := Arena.find(self)
+	var origin := _player.global_position
+	for attempt in 20:
+		var candidate := origin + Vector2.RIGHT.rotated(randf() * TAU) * randf_range(spawn_min_dist, spawn_max_dist)
+		if arena == null or arena.contains(candidate, SPAWN_MARGIN):
+			return candidate
+	if arena == null:
+		return origin + Vector2.RIGHT.rotated(randf() * TAU) * spawn_min_dist
+	# Player is pinned in a corner: spawn anywhere with a bit of breathing room.
+	var best := arena.random_point(SPAWN_MARGIN)
+	for attempt in 20:
+		var candidate := arena.random_point(SPAWN_MARGIN)
+		if candidate.distance_to(origin) > best.distance_to(origin):
+			best = candidate
+		if best.distance_to(origin) >= spawn_min_dist * 0.6:
+			break
+	return best
 
 
 func _on_enemy_killed(_pos: Vector2) -> void:
 	_alive -= 1
 	if _running and _alive <= 0 and _to_spawn <= 0:
 		_running = false
+		_awaiting_upgrade = true
 		GameEvents.wave_completed.emit(wave)
-		var t := get_tree().create_timer(wave_break)
-		t.timeout.connect(_start_next_wave)
+
+
+## The upgrade draft answers wave_completed with a pick (or null if the pool is
+## exhausted), and only THEN does the break start.
+##
+## The break deliberately isn't started from _on_enemy_killed: the draft screen
+## pauses the tree, and SceneTree.create_timer() defaults to process_always =
+## true, so a timer started there would keep ticking through the pause and drop
+## the next wave on top of the open screen. The `false` below keeps this timer
+## honest about pause too.
+func _on_upgrade_selected(_upgrade: UpgradeData) -> void:
+	if not _awaiting_upgrade:
+		return
+	_awaiting_upgrade = false
+	var t := get_tree().create_timer(wave_break, false)
+	t.timeout.connect(_start_next_wave)

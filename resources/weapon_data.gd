@@ -18,6 +18,10 @@ class_name WeaponData
 @export var projectile_lifetime: float = 0.9
 @export var projectiles_per_shot: int = 1
 @export var spread_deg: float = 4.0
+## Colour of the shot in the world. Deliberately NOT splat_color: the ink stain
+## has to be dark to occlude the screen, and a dark projectile disappears
+## against the arena floor. This one is bioluminescent so it reads at speed.
+@export var projectile_color: Color = Color(0.85, 0.5, 1.0, 1.0)
 
 # --- Screen splat ("less you see") ---------------------------------------
 ## How the ink stamps the screen: "streak" (directional trail),

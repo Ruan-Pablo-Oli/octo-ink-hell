@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_w825w"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_w4j28"]
+
+[sub_resource type="Resource" id="Resource_m3i4e"]
+script = ExtResource("1_w825w")
+stat = 10
+add = 1.0
+
+[resource]
+script = ExtResource("2_w4j28")
+display_name = "Ink Trail"
+description = "Your dash leaves a trail of ink that burns enemies who touch it."
+category = 1
+effects = Array[ExtResource("1_w825w")]([SubResource("Resource_m3i4e")])
+max_stacks = 1

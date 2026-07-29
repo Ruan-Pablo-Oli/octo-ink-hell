@@ -8,6 +8,7 @@ class_name EnemyBase
 
 var health: float
 var _player: Node2D
+var _arena: Arena
 var _touching_player: bool = false
 var _touch_cd: float = 0.0
 
@@ -39,6 +40,7 @@ func _ready() -> void:
 	touch.body_exited.connect(_on_touch_exited)
 
 	_player = get_tree().get_first_node_in_group("player")
+	_arena = Arena.find(self)
 
 
 ## Subclasses assign their default EnemyData here.
@@ -56,6 +58,8 @@ func _physics_process(delta: float) -> void:
 		return
 	_move(delta)
 	move_and_slide()
+	if _arena:
+		global_position = _arena.clamp_position(global_position, _radius())
 
 	if _touch_cd > 0.0:
 		_touch_cd -= delta

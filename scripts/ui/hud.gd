@@ -9,6 +9,7 @@ var _cleaner_bar: ProgressBar
 var _wave_label: Label
 var _dirty_label: Label
 var _tool_label: Label
+var _build_label: Label
 var _msg_label: Label
 
 
@@ -47,6 +48,12 @@ func _ready() -> void:
 	_tool_label.position = Vector2(24, 266)
 	root.add_child(_tool_label)
 
+	_build_label = _label("")
+	_build_label.position = Vector2(24, 296)
+	_build_label.add_theme_font_size_override("font_size", 13)
+	_build_label.add_theme_color_override("font_color", Color(0.72, 0.78, 0.88))
+	root.add_child(_build_label)
+
 	_msg_label = _label("")
 	_msg_label.set_anchors_preset(Control.PRESET_CENTER)
 	_msg_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -61,6 +68,7 @@ func _ready() -> void:
 	GameEvents.screen_dirtiness_changed.connect(_on_dirty)
 	GameEvents.wave_started.connect(_on_wave_started)
 	GameEvents.wave_completed.connect(_on_wave_completed)
+	GameEvents.upgrades_changed.connect(_on_upgrades_changed)
 	GameEvents.player_died.connect(_on_died)
 
 
@@ -96,6 +104,18 @@ func _on_wave_started(number: int) -> void:
 
 func _on_wave_completed(number: int) -> void:
 	_flash("Wave %d cleared!" % number)
+
+
+func _on_upgrades_changed() -> void:
+	var system := UpgradeSystem.find(self)
+	if system == null:
+		return
+	var lines: Array = []
+	for entry in system.acquired():
+		var up: UpgradeData = entry.upgrade
+		lines.append("%s x%d" % [up.display_name, entry.stacks] if entry.stacks > 1 else up.display_name)
+	lines.sort()
+	_build_label.text = "\n".join(lines)
 
 
 func _on_died() -> void:

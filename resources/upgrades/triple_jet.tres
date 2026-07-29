@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_6x1if"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_nokj2"]
+
+[sub_resource type="Resource" id="Resource_e228g"]
+script = ExtResource("1_6x1if")
+stat = 2
+add = 2.0
+
+[sub_resource type="Resource" id="Resource_suve3"]
+script = ExtResource("1_6x1if")
+stat = 4
+mult = 1.35
+
+[resource]
+script = ExtResource("2_nokj2")
+display_name = "Triple Jet"
+description = "Spit two extra projectiles per shot. Thirsty work."
+effects = Array[ExtResource("1_6x1if")]([SubResource("Resource_e228g"), SubResource("Resource_suve3")])
+max_stacks = 2

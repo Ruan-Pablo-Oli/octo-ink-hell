@@ -1,0 +1,21 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_3rfa1"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_ji18r"]
+
+[sub_resource type="Resource" id="Resource_hjpkm"]
+script = ExtResource("1_3rfa1")
+stat = 5
+add = 30.0
+
+[sub_resource type="Resource" id="Resource_7v3la"]
+script = ExtResource("1_3rfa1")
+stat = 6
+mult = 1.25
+
+[resource]
+script = ExtResource("2_ji18r")
+display_name = "Extra Gland"
+description = "+30 max ink and faster regeneration."
+category = 2
+effects = Array[ExtResource("1_3rfa1")]([SubResource("Resource_hjpkm"), SubResource("Resource_7v3la")])

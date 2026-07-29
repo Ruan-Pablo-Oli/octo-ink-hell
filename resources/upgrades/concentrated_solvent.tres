@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_y77d3"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_o3ye7"]
+
+[sub_resource type="Resource" id="Resource_1ru7r"]
+script = ExtResource("1_y77d3")
+stat = 12
+mult = 0.65
+
+[resource]
+script = ExtResource("2_o3ye7")
+display_name = "Concentrated Solvent"
+description = "-35% cleaning fluid per stain wiped."
+category = 2
+effects = Array[ExtResource("1_y77d3")]([SubResource("Resource_1ru7r")])

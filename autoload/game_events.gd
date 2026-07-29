@@ -9,6 +9,12 @@ signal ink_depleted
 ## Emitted once per shot. The InkOverlay listens to stamp a screen-space splat
 ## whose shape/orientation come from the weapon + shot direction.
 signal shot_fired(direction: Vector2, weapon: WeaponData)
+## Ink spilled by something that isn't a shot — currently the damaging dash
+## trail. Same payload and same stamping path as shot_fired; kept separate so
+## "a shot went out" stays a truthful signal (weapon cooldowns, future ammo UI).
+## Anything that can KILL has to cost vision, or it routes around the whole
+## "the more you attack, the less you see" premise.
+signal ink_spilled(direction: Vector2, splat: WeaponData)
 ## 0.0 = clean screen, 1.0 = fully inked over. Drives the HUD readout.
 signal screen_dirtiness_changed(value: float)
 
@@ -29,6 +35,15 @@ signal cleaning_collected
 # --- Waves ----------------------------------------------------------------
 signal wave_started(number: int)
 signal wave_completed(number: int)
+
+# --- Roguelite upgrades ---------------------------------------------------
+## The draft screen is showing these three choices.
+signal upgrade_offered(choices: Array)
+## A choice was made. `upgrade` is null when the pool had nothing left to offer;
+## the WaveManager waits on this signal either way, so it must always fire.
+signal upgrade_selected(upgrade: UpgradeData)
+## The player's stat modifiers changed — consumers recompute their effective values.
+signal upgrades_changed
 
 
 func _ready() -> void:

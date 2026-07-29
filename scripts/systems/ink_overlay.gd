@@ -37,7 +37,8 @@ func _ready() -> void:
 	_cursor.set_script(WiperCursorScript)
 	add_child(_cursor)
 
-	GameEvents.shot_fired.connect(_on_shot_fired)
+	GameEvents.shot_fired.connect(_stamp)
+	GameEvents.ink_spilled.connect(_stamp)
 	GameEvents.clean_mode_changed.connect(_on_clean_mode_changed)
 
 
@@ -54,7 +55,8 @@ func _on_clean_mode_changed(active: bool) -> void:
 	_cursor.queue_redraw()
 
 
-func _on_shot_fired(direction: Vector2, weapon: WeaponData) -> void:
+## Stamps one stain for any ink the player spills — a shot or a damaging dash.
+func _stamp(direction: Vector2, weapon: WeaponData) -> void:
 	var screen := get_viewport().get_visible_rect().size
 	var center := screen * 0.5
 	# Fling the stain outward in the aim direction, with perpendicular jitter,

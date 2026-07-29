@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_s4603"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_omjfa"]
+
+[sub_resource type="Resource" id="Resource_upm75"]
+script = ExtResource("1_s4603")
+stat = 3
+add = 1.0
+
+[resource]
+script = ExtResource("2_omjfa")
+display_name = "Acid Ink"
+description = "Corrosive ink punches through one extra enemy."
+effects = Array[ExtResource("1_s4603")]([SubResource("Resource_upm75")])
+max_stacks = 2

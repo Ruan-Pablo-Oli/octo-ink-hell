@@ -43,6 +43,14 @@ func _generate() -> void:
 
 
 func _draw() -> void:
+	# Soft spread first, so it can't paint over the rims below.
 	for b in _blobs:
 		draw_circle(b.pos, b.r * 1.25, Color(_color.r, _color.g, _color.b, _color.a * 0.28))
+	# Then a lighter wet rim under each fill. Without it the near-black ink
+	# blends straight into the dark scene and stops reading as ink on glass —
+	# the stain has to look like it's ON the screen, not part of the world.
+	var rim := _color.lightened(0.45)
+	rim.a = _color.a * 0.55
+	for b in _blobs:
+		draw_circle(b.pos, b.r * 1.07, rim)
 		draw_circle(b.pos, b.r, _color)

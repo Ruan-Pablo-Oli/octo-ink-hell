@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_awttp"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_tjddv"]
+
+[sub_resource type="Resource" id="Resource_p184e"]
+script = ExtResource("1_awttp")
+stat = 7
+mult = 1.15
+
+[resource]
+script = ExtResource("2_tjddv")
+display_name = "Agile Swim"
+description = "+15% movement speed."
+category = 1
+effects = Array[ExtResource("1_awttp")]([SubResource("Resource_p184e")])

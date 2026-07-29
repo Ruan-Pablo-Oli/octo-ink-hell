@@ -1,0 +1,19 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_tvj6p"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_4uoum"]
+
+[sub_resource type="Resource" id="Resource_bquwc"]
+script = ExtResource("1_tvj6p")
+mult = 1.25
+
+[sub_resource type="Resource" id="Resource_ew3x6"]
+script = ExtResource("1_tvj6p")
+stat = 13
+mult = 1.1
+
+[resource]
+script = ExtResource("2_4uoum")
+display_name = "Dense Ink"
+description = "Thicker ink hits harder — and leaves a bigger stain on the glass."
+effects = Array[ExtResource("1_tvj6p")]([SubResource("Resource_bquwc"), SubResource("Resource_ew3x6")])

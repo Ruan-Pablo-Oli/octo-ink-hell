@@ -1,0 +1,26 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3]
+
+[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_i52yb"]
+[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_oa8aw"]
+
+[sub_resource type="Resource" id="Resource_lkkk3"]
+script = ExtResource("1_i52yb")
+stat = 14
+mult = 0.75
+
+[sub_resource type="Resource" id="Resource_7fo1a"]
+script = ExtResource("1_i52yb")
+stat = 13
+mult = 0.85
+
+[sub_resource type="Resource" id="Resource_0s648"]
+script = ExtResource("1_i52yb")
+mult = 0.9
+
+[resource]
+script = ExtResource("2_oa8aw")
+display_name = "Diluted Ink"
+description = "Runnier ink stains far less, but hits softer. Sight over power."
+category = 2
+effects = Array[ExtResource("1_i52yb")]([SubResource("Resource_lkkk3"), SubResource("Resource_7fo1a"), SubResource("Resource_0s648")])
+max_stacks = 2

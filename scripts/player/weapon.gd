@@ -8,12 +8,45 @@ class_name Weapon
 
 const ProjectileScene := preload("res://scenes/combat/projectile.tscn")
 
+## Set by the Player. Upgrades are folded into `runtime`, never into `data`.
+var upgrades: UpgradeSystem
+## Per-instance copy of `data` with the run's upgrades baked in. `data` itself is
+## a preloaded .tres — one cached instance shared by every Weapon and outliving
+## reload_current_scene() — so writing upgrades into it would carry the last
+## run's build into the next one forever. Emitting `runtime` on shot_fired also
+## means the InkOverlay reads the upgraded splat size/dirtiness for free.
+var runtime: WeaponData
+
 var _cooldown: float = 0.0
+var _pierce: int = 0
 
 
 func _ready() -> void:
 	if data == null:
 		data = preload("res://resources/weapons/basic_ink.tres")
+	runtime = data.duplicate() as WeaponData
+	GameEvents.upgrades_changed.connect(recompute)
+	recompute()
+
+
+## Rebuilds `runtime` from the pristine `data` through the current upgrades.
+func recompute() -> void:
+	if runtime == null:
+		return
+	const S := UpgradeEffect.Stat
+	if upgrades == null:
+		_pierce = 0
+		return
+	runtime.projectile_damage = upgrades.value(S.DAMAGE, data.projectile_damage)
+	runtime.fire_rate = upgrades.value(S.FIRE_RATE, data.fire_rate)
+	runtime.ink_cost = upgrades.value(S.INK_COST, data.ink_cost)
+	runtime.projectiles_per_shot = maxi(1, roundi(upgrades.value(S.PROJECTILES, data.projectiles_per_shot)))
+	runtime.splat_size = upgrades.value(S.SPLAT_SIZE, data.splat_size)
+	runtime.splat_dirtiness = upgrades.value(S.SPLAT_DIRTINESS, data.splat_dirtiness)
+	# More pellets need a wider fan or they overlap into one stream.
+	if runtime.projectiles_per_shot > data.projectiles_per_shot:
+		runtime.spread_deg = maxf(data.spread_deg, 5.0 * runtime.projectiles_per_shot)
+	_pierce = maxi(0, roundi(upgrades.value(S.PIERCE, 0.0)))
 
 
 func _process(delta: float) -> void:
@@ -24,14 +57,14 @@ func _process(delta: float) -> void:
 ## Attempts a shot from `origin` toward `direction`. Consumes ink via `ink`.
 ## Returns true if a shot actually went out.
 func try_fire(origin: Vector2, direction: Vector2, ink: InkSystem) -> bool:
-	if data == null or _cooldown > 0.0:
+	if runtime == null or _cooldown > 0.0:
 		return false
-	if not ink.consume(data.ink_cost):
+	if not ink.consume(runtime.ink_cost):
 		GameEvents.ink_depleted.emit()
 		return false
-	_cooldown = 1.0 / maxf(0.01, data.fire_rate)
+	_cooldown = 1.0 / maxf(0.01, runtime.fire_rate)
 	_spawn(origin, direction)
-	GameEvents.shot_fired.emit(direction, data)
+	GameEvents.shot_fired.emit(direction, runtime)
 	return true
 
 
@@ -40,8 +73,8 @@ func _spawn(origin: Vector2, direction: Vector2) -> void:
 	if entities == null:
 		entities = get_tree().current_scene
 	var base_ang := direction.angle()
-	var n := maxi(1, data.projectiles_per_shot)
-	var spread := deg_to_rad(data.spread_deg)
+	var n := maxi(1, runtime.projectiles_per_shot)
+	var spread := deg_to_rad(runtime.spread_deg)
 	for i in n:
 		var off := 0.0
 		if n > 1:
@@ -52,4 +85,5 @@ func _spawn(origin: Vector2, direction: Vector2) -> void:
 		var p := ProjectileScene.instantiate()
 		entities.add_child(p)
 		p.global_position = origin + dir * 22.0
-		p.setup(dir, data.projectile_speed, data.projectile_damage, data.projectile_lifetime, data.splat_color)
+		p.setup(dir, runtime.projectile_speed, runtime.projectile_damage,
+			runtime.projectile_lifetime, runtime.projectile_color, _pierce)

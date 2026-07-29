@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="WeaponData" load_steps=2 format=3]
+
+[ext_resource type="Script" path="res://resources/weapon_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Dash Ink"
+ink_cost = 0.0
+fire_rate = 0.0
+projectile_speed = 0.0
+projectile_damage = 0.0
+projectile_lifetime = 0.0
+projectiles_per_shot = 0
+spread_deg = 0.0
+projectile_color = Color(0.25, 0.55, 0.95, 1)
+splat_style = "burst"
+splat_color = Color(0.05, 0.08, 0.14, 0.94)
+splat_size = 34.0
+splat_droplets = 6
+splat_dirtiness = 0.018
