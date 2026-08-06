@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://bg8ndlskn4ldy"]
+
+[ext_resource type="Script" uid="uid://8twel2doh3k1" path="res://resources/enemy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Swarmer"
+body_color = Color(2.2140146e-06, 0.694925, 0.5672074, 1)

@@ -1,7 +1,7 @@
-[gd_resource type="Resource" script_class="UpgradeData" format=3]
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://f7wnalsy0xqj"]
 
-[ext_resource type="Script" path="res://resources/upgrade_effect.gd" id="1_7t3v1"]
-[ext_resource type="Script" path="res://resources/upgrade_data.gd" id="2_5toul"]
+[ext_resource type="Script" uid="uid://dvxlmkgi7nds3" path="res://resources/upgrade_effect.gd" id="1_7t3v1"]
+[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="2_5toul"]
 
 [sub_resource type="Resource" id="Resource_gnhh6"]
 script = ExtResource("1_7t3v1")
