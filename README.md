@@ -1,185 +1,142 @@
 # Octo Ink Hell
 
-Top-down bullet-hell / horde-survival roguelite in **Godot 4.7 (GDScript, Forward+)**.
-You play a bioluminescent octopus fighting oil-corrupted fauna. **Ink is ammo,
-mobility and vision at once** — every shot stamps ink onto the screen, and the
-more you fire the less you can see. Cleaning droplets dropped by enemies wipe the
-glass clean again.
+Bullet-hell / horde-survival roguelite em Godot 4.7 (GDScript, Forward+).
 
-> Guiding line: *"The more you attack, the less you see."*
+Voce controla um polvo bioluminescente numa arena submersa. A tinta e municao,
+mas cada tiro tambem mancha a tela: quanto mais voce atira, menos voce enxerga.
+Pra limpar, troca o cuspidor de tinta pelo rodo e esfrega as manchas na mao,
+gastando fluido de limpeza que so os inimigos dropam.
 
-## Running
+## Rodando
 
-Open the folder in Godot 4.7 and press **F5**, or from the CLI:
+Abre a pasta no Godot 4.7 e F5. Pela linha de comando:
 
-```bash
-godot --path .            # play
-godot --headless --import # just (re)import assets
-```
+    godot --path .
 
-**Controls** — WASD/arrows move · mouse aims · **left mouse = use tool** ·
-**right mouse = swap tool** (ink spitter ↔ squeegee) · **Space/Shift** to dash.
-Input actions are registered in code (`autoload/game_events.gd::_setup_input`),
-not in `project.godot`.
+Controles: WASD/setas anda, mouse mira, botao esquerdo usa a ferramenta atual,
+botao direito troca entre cuspidor e rodo, Espaco/Shift da dash.
 
-## The core mechanic (as built)
+As input actions sao registradas em codigo no `game_events.gd`, nao no
+project.godot.
 
-Firing does **not** dim the screen. Each shot stamps a real **ink stain onto a
-screen-space overlay** (`InkOverlay`, a `CanvasLayer` that ignores the camera).
-The stain's **shape and orientation come from the weapon + shot angle**:
+## Mecanica central
 
-- `WeaponData.splat_style` = `streak` (directional trail), `blob` (round) or `burst` (radial)
-- the splat is rotated to the shot direction and flung outward in the aim direction,
-  so hammering one direction cakes that side of the view
-- `screen_dirtiness` (0..1) accumulates and is shown on the HUD
+Atirar nao escurece a tela. Cada tiro carimba uma mancha de verdade num
+CanvasLayer em screen-space (`InkOverlay`), que nao acompanha a camera. O
+formato vem da arma (`splat_style`: streak, blob ou burst) e a mancha e rotada
+na direcao do tiro e arremessada pra fora, entao metralhar pra um lado suja
+aquele lado da tela.
 
-**Anything that kills has to cost vision.** The Ink Trail dash deals damage, so
-it sprays a stain per puddle too (`GameEvents.ink_spilled`, same stamping path as
-a shot) — otherwise dashing through the horde clears waves with a spotless
-screen and routes around the whole premise. A plain, non-damaging dash stays
-free. Keep this rule in mind when adding any new source of damage.
+Qualquer coisa que mata precisa custar visao. A poca do dash com Ink Trail
+causa dano, entao ela tambem carimba mancha, senao dava pra limpar as ondas
+atropelando todo mundo com a tela impecavel. Dash sem dano continua de graca.
 
-Note that the projectile's colour is **not** the ink colour (`projectile_color`
-vs `splat_color`): the stain has to be darker than the arena floor so it
-occludes, and a projectile that dark is invisible against it.
+A cor do projetil nao e a cor da mancha de proposito. A mancha precisa ser
+mais escura que o chao pra ocluir, e um projetil dessa cor sumiria em cima dela.
 
-Cleaning is **active**, not automatic. Right-click swaps the ink spitter for a
-**squeegee** — the OS cursor is hidden and the overlay draws the squeegee in its
-place. Holding left-click **scrubs the stains under the cursor** (`InkOverlay.wipe_at`),
-which you have to physically drag over them. This costs **cleaning fluid**
-(`CleanerSystem`, a second reservoir), and while cleaning you can't shoot, so the
-horde piles up — that's the tension. Enemy **cleaning-droplet drops refuel the
-fluid** (they no longer wipe anything by themselves).
+Limpar e ativo. No modo rodo o cursor do sistema some e o overlay desenha o
+rodo no lugar. Segurando o botao esquerdo voce apaga as manchas embaixo do
+cursor (`InkOverlay.wipe_at`), arrastando por cima delas. Isso gasta fluido
+(`CleanerSystem`) e enquanto limpa voce nao atira, entao a horda acumula.
 
-Tune the ink side in `resources/weapons/basic_ink.tres`; tune wipe radius/cost on
-the `Player` and fluid capacity on `CleanerSystem` — no code changes needed.
+## Arena
 
-## The arena
+Arena fechada de 2200x1400 (`scripts/world/arena.gd`). Antes o mapa era
+infinito e o jogo ficava trivial: andar de re atirando ganhava de qualquer
+horda porque nada te encurralava.
 
-The fight happens in a bounded tank (`scripts/world/arena.gd`, 2200×1400 by
-default, tunable on the node). Before it existed the map was infinite, which made
-the game trivial: walking backwards while firing beat any horde, because nothing
-could ever corner you. Retreating now buys distance and costs space.
+Nada colide fisicamente com as paredes. Os corpos ficam com `collision_mask = 0`
+igual ao resto do projeto e quem se move se clampa sozinho no
+`Arena.clamp_position()`. A camera usa a arena como `limit_*`, os projeteis
+somem ao encostar na parede e o WaveManager rejeita spawn fora dos limites.
 
-Nothing physically collides with the walls — bodies keep `collision_mask = 0`
-like the rest of the project, and movers clamp themselves via
-`Arena.clamp_position()`. The camera takes the arena as its `limit_*` rect so
-hugging an edge doesn't show the void outside, projectiles despawn on contact
-with the walls, and `WaveManager` rejects spawn points that fall outside them —
-cornering yourself would otherwise put half the spawn ring in the void, and the
-fallback drops enemies anywhere far enough away instead of on top of you.
+## Upgrades
 
-## Roguelite upgrades
+Terminou a onda, o jogo pausa e sorteia tres cartas (clique ou tecla 1/2/3).
+Voce tem 15 segundos; se acabar, uma roleta corre pelas cartas e para numa
+sozinha. O contador roda em PROCESS_MODE_ALWAYS porque a arvore esta pausada.
 
-Clearing a wave pauses the game and deals **three cards** (click, or press 1/2/3).
-You get **15 seconds**; let it run out and the draft draws for you, with the
-highlight rouletting across the cards and easing to a stop on the winner. Input
-is locked once the roulette starts — out of time means out of your hands. The
-countdown runs on `PROCESS_MODE_ALWAYS`, since the tree it lives in is paused.
-The roll spreads across **Offensive / Mobility / Utility** so it's a choice
-between playstyles, not three flavours of "more damage", and upgrades that hit
-their `max_stacks` drop out of the pool.
+O sorteio espalha entre Offensive / Mobility / Utility pra escolha ser entre
+estilos de jogo, e nao tres sabores de "mais dano". Upgrade que bateu o
+`max_stacks` sai do pool.
 
-The pool is built around the game's own tension: **offensive upgrades dirty the
-screen faster** (Dense Ink grows the splat, Hair Trigger stamps more of them per
-second), and the Utility branch buys vision back — up to *Diluted Ink*, which
-trades raw damage for a much cleaner screen.
+O pool foi montado em cima da propria tensao do jogo: upgrade ofensivo suja a
+tela mais rapido (Dense Ink aumenta a mancha, Hair Trigger carimba mais por
+segundo) e o ramo Utility compra visao de volta, ate o Diluted Ink, que troca
+dano por tela limpa.
 
-12 upgrades ship in `resources/upgrades/`. Adding one = drop a `.tres` there and
-list it in `UpgradePool.ALL`; no other code changes.
+Sao 12 upgrades em `resources/upgrades/`. Pra adicionar um: joga o .tres la e
+lista no `UpgradePool.ALL`.
 
-Two implementation notes worth keeping in mind when extending this:
+Duas coisas pra lembrar mexendo nisso:
 
-- **Upgrades never mutate `WeaponData`/`EnemyData`.** Those `.tres` are preloaded,
-  so every user shares one cached instance that survives `reload_current_scene()`
-  — writing a buff into one would carry the last run's build into the next, and
-  compound forever. `Weapon` keeps its `.tres` as an immutable base plus a
-  per-instance `runtime` copy with the upgrades folded in; everyone else asks
-  `UpgradeSystem.value(stat, base)`.
-- **The wave break is not a timer.** `SceneTree.create_timer()` defaults to
-  `process_always = true`, so a break timer keeps ticking while the draft screen
-  has the tree paused and drops the next wave on top of it. `WaveManager` waits
-  for `upgrade_selected` instead — which the screen emits even when it has
-  nothing left to offer, so an exhausted pool can't deadlock the run.
+Upgrade nunca escreve dentro de WeaponData/EnemyData. Esses .tres sao
+preloaded, entao todo mundo compartilha a mesma instancia em cache, que
+sobrevive ao `reload_current_scene()`. Gravar um buff ali carregava o build da
+run anterior pra proxima e ia acumulando pra sempre. A Weapon guarda o .tres
+como base imutavel e uma copia `runtime` por instancia com os upgrades
+aplicados; o resto pergunta pro `UpgradeSystem.value(stat, base)`.
 
-## Architecture
+O intervalo entre ondas nao e timer. `SceneTree.create_timer()` vem com
+`process_always = true`, entao um timer continuaria contando com a tela de
+upgrade pausando a arvore e a proxima onda cairia por cima. O WaveManager
+espera o `upgrade_selected`, que a tela emite mesmo quando nao tem mais nada
+pra oferecer, senao o pool vazio travava a run.
 
-Systems are decoupled through a **signal bus** (`GameEvents` autoload); nodes emit
-signals instead of holding references to each other. Enemies and weapons are
-**data-driven** via custom `Resource` types (`.tres` files = Godot's answer to
-Unity ScriptableObjects), so balancing happens in files.
+## Arquitetura
 
-```
-autoload/
-  game_events.gd        Signal bus + input-map registration
-resources/
-  weapon_data.gd        WeaponData  (cost, projectiles, splat shape)
-  enemy_data.gd         EnemyData   (hp, speed, damage, drop chance)
-  upgrade_data.gd       UpgradeData (category, description, effects, stacks)
-  upgrade_effect.gd     UpgradeEffect (one stat + add + mult)
-  weapons/basic_ink.tres
-  enemies/swarmer.tres
-  upgrades/*.tres       The 12 roguelite upgrades
-scripts/
-  main.gd               Builds & wires the world in the right order
-  world/arena.gd        Bounded tank: clamping, spawn sampling, camera limits
-  player/
-    player.gd           CharacterBody2D: move, aim, dash, tool swap, HP
-    ink_system.gd       Ink reservoir (consume/regen/refill)
-    cleaner_system.gd   Cleaning-fluid reservoir (refilled only by pickups)
-    weapon.gd           Fires projectiles, spends ink, emits shot_fired
-    upgrade_system.gd   Run's picked upgrades -> final stat values
-  combat/projectile.gd  Straight-line ink shot, damages first enemy (+pierce)
-  enemies/
-    enemy_base.gd       EnemyBase: chase + contact damage + loot roll
-    swarmer.gd          Swarmer extends EnemyBase (weaving horde unit)
-  systems/
-    ink_overlay.gd      >>> screen-ink mechanic + active wipe (wipe_at) + cursor
-    wave_manager.gd     Escalating waves, waits for the upgrade pick
-    upgrade_pool.gd     The roster + the 3-card roll
-  effects/
-    ink_splat.gd        One procedurally-drawn ink stain
-    wiper_cursor.gd     Screen-space squeegee cursor
-    ink_trail.gd        Damaging ink puddle left by a dash (upgrade)
-  pickups/cleaning_item.gd
-  ui/
-    hud.gd              HP/ink bars, wave, dirtiness, build, banners
-    upgrade_screen.gd   Between-wave draft: 15s clock + roulette auto-pick
-scenes/                 Thin .tscn stubs; visuals/collision built in code
-```
+Os sistemas conversam por um signal bus (`GameEvents`, autoload) em vez de
+guardar referencia um do outro. Inimigos e armas sao data-driven em Resource
+customizado (.tres), entao balanceamento e mexer em arquivo, nao em codigo.
 
-**Why visuals are built in code:** every entity is a placeholder (procedural
-`_draw`), so the `.tscn` files are one-node stubs. When real art arrives, replace
-the `_draw` calls with `Sprite2D`/`AnimatedSprite2D` children in each scene — the
-logic and signals don't change.
+    autoload/
+      game_events.gd        signal bus + input map
+    resources/
+      weapon_data.gd        custo, projeteis, formato da mancha
+      enemy_data.gd         hp, velocidade, dano, chance de drop
+      upgrade_data.gd       categoria, descricao, efeitos, stacks
+      upgrade_effect.gd     um stat + add + mult
+    scripts/
+      main.gd               monta e liga o mundo na ordem certa
+      world/arena.gd        clamp, spawn, limites de camera
+      player/
+        player.gd           movimento, mira, dash, troca de ferramenta, HP
+        ink_system.gd       reservatorio de tinta
+        cleaner_system.gd   reservatorio de fluido de limpeza
+        weapon.gd           dispara, gasta tinta, emite shot_fired
+        upgrade_system.gd   upgrades da run -> valor final dos stats
+      combat/projectile.gd
+      enemies/
+        enemy_base.gd       persegue, dano por contato, sorteia drop
+        swarmer.gd
+      systems/
+        ink_overlay.gd      mancha na tela + wipe_at + cursor do rodo
+        wave_manager.gd     ondas escalonadas
+        upgrade_pool.gd     roster + sorteio de 3 cartas
+      effects/
+      pickups/
+      ui/
+        hud.gd
+        upgrade_screen.gd   draft entre ondas, 15s + roleta
 
-### Collision layers
+Os .tscn sao stubs de um no so. Todo entity ainda e placeholder desenhado
+proceduralmente no `_draw`. Quando a arte real chegar e so trocar os `_draw`
+por Sprite2D/AnimatedSprite2D dentro de cada cena, sem mexer na logica.
 
-| bit | value | layer            |
-|-----|-------|------------------|
-| 1   | 1     | player           |
-| 2   | 2     | enemies          |
-| 3   | 4     | player projectile|
-| 4   | 8     | pickups          |
+Camadas de colisao: 1 player, 2 inimigos, 4 projetil do player, 8 pickups.
+Nada bloqueia nada fisicamente (mask 0), tudo passa por Area2D.
 
-Bodies don't physically block each other (masks are 0); all interactions go
-through `Area2D` detection.
+## Proximos passos
 
-## Next steps
-
-1. **Shooter & Boss** — new `EnemyBase` subclasses; bullet-hell patterns via
-   `Timer` + `await`.
-2. **Object pooling** for projectiles/enemies once counts climb.
-3. **Bioluminescent glow** — enable `rendering/viewport/hdr_2d` + a
-   `WorldEnvironment` with glow, and push bright colors (eyes, cleaning drops)
-   above 1.0 so they bloom.
-4. **XP / leveling** off `EnemyData.xp_value` (already carried but unused) — would
-   let upgrades also drop mid-wave instead of only between waves.
+- Shooter e Boss como subclasses de EnemyBase, com padroes de tiro em Timer + await
+- Object pooling de projeteis e inimigos quando a contagem subir
+- Glow bioluminescente: ligar hdr_2d + WorldEnvironment e empurrar as cores
+  brilhantes acima de 1.0
+- XP e level usando o `EnemyData.xp_value`, que ja existe mas nao e usado
 
 ## Status
 
-Move, aim, dash, fire (spends ink + inks the screen by weapon/angle), swap to a
-squeegee and actively scrub stains off (spending fluid), escalating Swarmer waves
-inside a bounded arena, random cleaning drops that refuel the squeegee, a timed
-between-wave upgrade draft with 12 upgrades across three categories, and a live
-HUD. Imports and runs clean on Godot 4.7.
+Anda, mira, dash, atira gastando tinta e sujando a tela conforme arma e angulo,
+troca pro rodo e limpa gastando fluido, ondas escalonadas de Swarmer numa arena
+fechada, drops de limpeza, draft de upgrade entre ondas com 12 upgrades em tres
+categorias e HUD funcionando. Importa e roda no Godot 4.7.

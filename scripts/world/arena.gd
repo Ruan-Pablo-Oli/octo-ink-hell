@@ -1,19 +1,8 @@
 extends Node2D
 class_name Arena
-## The tank the fight happens in. Before this existed the arena was infinite, so
-## walking backwards while firing beat any horde — nothing could ever corner you.
-## Bounded play means retreating buys distance now and costs you space later.
-##
-## Nothing physically collides with the walls: like the rest of the project,
-## bodies keep collision_mask = 0 and interactions stay explicit. Movers clamp
-## themselves through clamp_position() instead, which is predictable and can't
-## wedge an entity inside geometry.
 
 @export var size: Vector2 = Vector2(2200.0, 1400.0)
 @export var wall_thickness: float = 24.0
-## Kept deliberately lighter than the ink: the screen splats are near-black so
-## they occlude, and on a floor as dark as they are neither the stains nor the
-## projectiles read at all.
 @export var floor_color: Color = Color(0.085, 0.12, 0.18, 1.0)
 @export var wall_color: Color = Color(0.2, 0.46, 0.62, 1.0)
 @export var grid_color: Color = Color(0.14, 0.23, 0.33, 1.0)
@@ -22,10 +11,9 @@ class_name Arena
 
 func _ready() -> void:
 	add_to_group("arena")
-	z_index = -100  # behind every entity regardless of tree order
+	z_index = -100
 
 
-## Playable rectangle, centred on the origin (where the player spawns).
 func bounds() -> Rect2:
 	return Rect2(-size * 0.5, size)
 
@@ -34,7 +22,6 @@ func contains(point: Vector2, margin: float = 0.0) -> bool:
 	return bounds().grow(-margin).has_point(point)
 
 
-## Nearest point inside the walls, keeping a body of `radius` fully inside.
 func clamp_position(point: Vector2, radius: float = 0.0) -> Vector2:
 	var b := bounds().grow(-radius)
 	return Vector2(
@@ -55,8 +42,6 @@ func _draw() -> void:
 	var b := bounds()
 	draw_rect(b, floor_color, true)
 
-	# Faint grid: in an otherwise empty dark tank there's nothing to read your
-	# own speed against, which made the old infinite space feel static.
 	var x := b.position.x + grid_step
 	while x < b.end.x:
 		draw_line(Vector2(x, b.position.y), Vector2(x, b.end.y), grid_color, 1.0)
@@ -66,7 +51,6 @@ func _draw() -> void:
 		draw_line(Vector2(b.position.x, y), Vector2(b.end.x, y), grid_color, 1.0)
 		y += grid_step
 
-	# Glass walls: a soft outer halo plus a solid rim.
 	draw_rect(b, Color(wall_color.r, wall_color.g, wall_color.b, 0.22), false, wall_thickness * 2.5)
 	draw_rect(b, wall_color, false, wall_thickness)
 	draw_rect(b, Color(0.65, 0.9, 1.0, 0.5), false, 2.0)

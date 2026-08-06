@@ -1,20 +1,11 @@
 extends Node2D
 class_name Weapon
-## Fires projectiles defined by a WeaponData resource, spending ink per shot.
-## Emits GameEvents.shot_fired so the ink overlay can stamp the screen — the
-## weapon itself knows nothing about the overlay.
 
 @export var data: WeaponData
 
 const ProjectileScene := preload("res://scenes/combat/projectile.tscn")
 
-## Set by the Player. Upgrades are folded into `runtime`, never into `data`.
 var upgrades: UpgradeSystem
-## Per-instance copy of `data` with the run's upgrades baked in. `data` itself is
-## a preloaded .tres — one cached instance shared by every Weapon and outliving
-## reload_current_scene() — so writing upgrades into it would carry the last
-## run's build into the next one forever. Emitting `runtime` on shot_fired also
-## means the InkOverlay reads the upgraded splat size/dirtiness for free.
 var runtime: WeaponData
 
 var _cooldown: float = 0.0
@@ -29,7 +20,6 @@ func _ready() -> void:
 	recompute()
 
 
-## Rebuilds `runtime` from the pristine `data` through the current upgrades.
 func recompute() -> void:
 	if runtime == null:
 		return
@@ -43,7 +33,6 @@ func recompute() -> void:
 	runtime.projectiles_per_shot = maxi(1, roundi(upgrades.value(S.PROJECTILES, data.projectiles_per_shot)))
 	runtime.splat_size = upgrades.value(S.SPLAT_SIZE, data.splat_size)
 	runtime.splat_dirtiness = upgrades.value(S.SPLAT_DIRTINESS, data.splat_dirtiness)
-	# More pellets need a wider fan or they overlap into one stream.
 	if runtime.projectiles_per_shot > data.projectiles_per_shot:
 		runtime.spread_deg = maxf(data.spread_deg, 5.0 * runtime.projectiles_per_shot)
 	_pierce = maxi(0, roundi(upgrades.value(S.PIERCE, 0.0)))
@@ -54,8 +43,6 @@ func _process(delta: float) -> void:
 		_cooldown -= delta
 
 
-## Attempts a shot from `origin` toward `direction`. Consumes ink via `ink`.
-## Returns true if a shot actually went out.
 func try_fire(origin: Vector2, direction: Vector2, ink: InkSystem) -> bool:
 	if runtime == null or _cooldown > 0.0:
 		return false

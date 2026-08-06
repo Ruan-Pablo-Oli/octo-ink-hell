@@ -1,13 +1,5 @@
 extends CharacterBody2D
 class_name Player
-## Top-down octopus. Moves, aims at the mouse, dashes, and wields two tools:
-##   - Ink Spitter (attack): left mouse fires ink, spending ink + inking the screen
-##   - Squeegee (clean):     left mouse scrubs stains off the screen, spending fluid
-## Right mouse swaps between them — in clean mode the OS cursor is hidden and the
-## InkOverlay draws a squeegee in its place.
-##
-## Visuals and child systems (collision, InkSystem, CleanerSystem, Weapon, Camera)
-## are built in code so the .tscn stays a trivial stub.
 
 enum Tool { ATTACK, CLEAN }
 
@@ -17,15 +9,10 @@ enum Tool { ATTACK, CLEAN }
 @export var dash_time: float = 0.14
 @export var dash_cooldown: float = 0.7
 @export var wipe_radius: float = 55.0
-## Cleaning fluid spent per stain wiped.
 @export var wipe_cost: float = 4.0
 
 const InkTrailScene := preload("res://scenes/effects/ink_trail.tscn")
-## Splat stamped on the screen for each puddle of a damaging dash. Only its
-## splat_* fields are read — the combat fields are zeroed and unused; it rides on
-## WeaponData because that's what the overlay's stamping path already speaks.
 const DashInkData := preload("res://resources/weapons/dash_ink.tres")
-## Seconds between puddles dropped while dashing with the Ink Trail upgrade.
 const TRAIL_INTERVAL := 0.035
 const BODY_RADIUS := 18.0
 
@@ -45,8 +32,6 @@ var _trail_timer: float = 0.0
 var _wiggle: float = 0.0
 var _alive: bool = true
 
-# Effective stats, recomputed when upgrades change so the hot path stays cheap.
-# The @export values above are the untouched baseline.
 var _eff_move_speed: float
 var _eff_dash_time: float
 var _eff_dash_cooldown: float
@@ -54,16 +39,14 @@ var _eff_wipe_radius: float
 var _eff_wipe_cost: float
 var _dash_trail: bool = false
 var _arena: Arena
-## Per-instance copy of DashInkData with the run's splat upgrades folded in.
-## Same reason as Weapon.runtime: the .tres is a shared cached instance.
 var _dash_splat: WeaponData
 
 
 func _ready() -> void:
 	add_to_group("player")
 	health = max_health
-	collision_layer = 1  # player
-	collision_mask = 0   # move freely; interactions happen via Area2D
+	collision_layer = 1
+	collision_mask = 0
 
 	var col := CollisionShape2D.new()
 	var shape := CircleShape2D.new()
@@ -73,7 +56,6 @@ func _ready() -> void:
 
 	_arena = Arena.find(self)
 
-	# Upgrades first: the systems below read it as they come up.
 	upgrades = UpgradeSystem.new()
 	upgrades.name = "UpgradeSystem"
 	add_child(upgrades)
@@ -99,8 +81,6 @@ func _ready() -> void:
 	var cam := Camera2D.new()
 	cam.position_smoothing_enabled = true
 	cam.position_smoothing_speed = 8.0
-	# Stop the camera at the walls, otherwise hugging an edge shows the void
-	# outside the tank and the wall stops reading as a boundary.
 	if _arena:
 		var b := _arena.bounds()
 		cam.limit_left = int(b.position.x)
@@ -115,23 +95,17 @@ func _ready() -> void:
 	call_deferred("_emit_initial")
 
 
-## Folds the run's upgrades into the stats read every frame.
 func _recompute() -> void:
 	const S := UpgradeEffect.Stat
 	_eff_move_speed = upgrades.value(S.MOVE_SPEED, move_speed)
 	_eff_dash_cooldown = upgrades.value(S.DASH_COOLDOWN, dash_cooldown)
-	# Distance = speed * time; stretching the time keeps the dash's punchy feel
-	# while carrying you further.
 	_eff_dash_time = dash_time * upgrades.value(S.DASH_DISTANCE, 1.0)
 	_eff_wipe_radius = upgrades.value(S.WIPE_RADIUS, wipe_radius)
 	_eff_wipe_cost = upgrades.value(S.WIPE_COST, wipe_cost)
 	_dash_trail = upgrades.has_flag(S.DASH_TRAIL)
-	# The dash spray obeys the same splat upgrades as the spitter, so Diluted Ink
-	# cleans up after both.
 	if _dash_splat:
 		_dash_splat.splat_size = upgrades.value(S.SPLAT_SIZE, DashInkData.splat_size)
 		_dash_splat.splat_dirtiness = upgrades.value(S.SPLAT_DIRTINESS, DashInkData.splat_dirtiness)
-	# Keep the squeegee ring honest if Wide Squeegee landed mid-run.
 	if _tool == Tool.CLEAN:
 		var ov := _get_overlay()
 		if ov:
@@ -199,12 +173,9 @@ func _set_tool(next_tool: Tool) -> void:
 	var cleaning := next_tool == Tool.CLEAN
 	GameEvents.clean_mode_changed.emit(cleaning)
 	if cleaning:
-		# Push the real radius so the drawn ring matches what wipe_at() will catch.
 		var ov := _get_overlay()
 		if ov:
 			ov.set_wipe_radius(_eff_wipe_radius)
-	# Literally swap the mouse for the squeegee: hide the OS cursor in clean mode
-	# (the InkOverlay draws the squeegee there instead).
 	Input.mouse_mode = Input.MOUSE_MODE_HIDDEN if cleaning else Input.MOUSE_MODE_VISIBLE
 
 
@@ -221,22 +192,16 @@ func _wipe() -> void:
 		cleaner.consume(wiped * _eff_wipe_cost)
 
 
-## Drops one puddle of the dash trail (Ink Trail upgrade) in world space, and
-## inks the screen for it. The trail deals damage, so it has to cost vision like
-## every other way of killing something — otherwise dashing through the horde is
-## a way to clear waves with a spotless screen, which beats the whole game.
-## Per puddle rather than per dash, so a longer dash (Jet Propulsion) sprays more.
 func _spawn_trail() -> void:
 	var entities := get_tree().get_first_node_in_group("entities")
 	if entities == null:
 		entities = get_tree().current_scene
 	var trail := InkTrailScene.instantiate()
-	entities.add_child(trail)  # parent first: global_position needs a transform
+	entities.add_child(trail)
 	trail.global_position = global_position
 	GameEvents.ink_spilled.emit(_dash_dir, _dash_splat)
 
 
-## The overlay is built by main.gd, so look it up lazily and survive a reload.
 func _get_overlay() -> Node:
 	if _overlay == null or not is_instance_valid(_overlay):
 		_overlay = get_tree().get_first_node_in_group("ink_overlay")
@@ -270,20 +235,16 @@ func _die() -> void:
 
 func _draw() -> void:
 	var t := _wiggle
-	# Tentacles.
 	for i in 8:
 		var ang := TAU * i / 8.0 + sin(t * 3.0 + i) * 0.15
 		var length := 22.0 + sin(t * 6.0 + i) * 4.0
 		var base := Vector2.RIGHT.rotated(ang) * 8.0
 		var tip := Vector2.RIGHT.rotated(ang) * length
 		draw_line(base, tip, Color(0.42, 0.18, 0.55), 5.0)
-	# Head.
 	draw_circle(Vector2.ZERO, 16.0, Color(0.55, 0.25, 0.7))
-	# Eyes look toward the aim.
 	var eye := _aim_dir * 5.0
 	draw_circle(Vector2(-6, -4) + eye, 3.5, Color.WHITE)
 	draw_circle(Vector2(6, -4) + eye, 3.5, Color.WHITE)
 	draw_circle(Vector2(-6, -4) + eye * 1.6, 1.8, Color.BLACK)
 	draw_circle(Vector2(6, -4) + eye * 1.6, 1.8, Color.BLACK)
-	# Aim hint.
 	draw_line(Vector2.ZERO, _aim_dir * 20.0, Color(0.9, 0.9, 1.0, 0.4), 2.0)

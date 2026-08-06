@@ -1,8 +1,4 @@
 extends Area2D
-## A puddle of ink left behind by a dash (Ink Trail upgrade). Unlike the screen
-## splats this lives in WORLD space: it damages enemies that walk into it, then
-## fades. Each enemy is only hit once per puddle so a stationary swarmer doesn't
-## get shredded by a single drop.
 
 const LIFETIME := 1.8
 const RADIUS := 26.0
@@ -15,8 +11,8 @@ var _blobs: Array = []
 
 
 func _ready() -> void:
-	collision_layer = 4  # player projectile
-	collision_mask = 2   # enemies
+	collision_layer = 4
+	collision_mask = 2
 	monitoring = true
 	var col := CollisionShape2D.new()
 	var s := CircleShape2D.new()
@@ -25,7 +21,6 @@ func _ready() -> void:
 	add_child(col)
 	body_entered.connect(_on_body_entered)
 
-	# Irregular puddle, generated once so it doesn't shimmer while fading.
 	for i in 4:
 		_blobs.append({
 			"pos": Vector2(randf_range(-8.0, 8.0), randf_range(-8.0, 8.0)),

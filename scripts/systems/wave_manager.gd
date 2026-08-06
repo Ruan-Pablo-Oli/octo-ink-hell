@@ -1,11 +1,9 @@
 extends Node
-## Spawns escalating waves of enemies around the player. Each cleared wave grows
-## the next one. Between waves there's a short break — the natural hook point for
-## the roguelite upgrade screen later (see README "Next steps").
 
 const SwarmerScene := preload("res://scenes/enemies/swarmer.tscn")
 const ShooterScene := preload("res://scenes/enemies/shooter.tscn")
 ## Keeps spawns off the wall itself.
+
 const SPAWN_MARGIN := 60.0
 
 @export var base_count: int = 6
@@ -87,10 +85,6 @@ func _spawn_one() -> void:
 	enemy.global_position = _spawn_position()
 
 
-## Picks a spot to drop an enemy: on a ring around the player, but inside the
-## arena walls. Cornering the player makes most of that ring fall outside the
-## tank, so we fall back to any far-enough point in the arena rather than
-## clamping onto the wall right next to them.
 func _spawn_position() -> Vector2:
 	var arena := Arena.find(self)
 	var origin := _player.global_position
@@ -100,7 +94,6 @@ func _spawn_position() -> Vector2:
 			return candidate
 	if arena == null:
 		return origin + Vector2.RIGHT.rotated(randf() * TAU) * spawn_min_dist
-	# Player is pinned in a corner: spawn anywhere with a bit of breathing room.
 	var best := arena.random_point(SPAWN_MARGIN)
 	for attempt in 20:
 		var candidate := arena.random_point(SPAWN_MARGIN)
@@ -119,14 +112,6 @@ func _on_enemy_killed(_pos: Vector2) -> void:
 		GameEvents.wave_completed.emit(wave)
 
 
-## The upgrade draft answers wave_completed with a pick (or null if the pool is
-## exhausted), and only THEN does the break start.
-##
-## The break deliberately isn't started from _on_enemy_killed: the draft screen
-## pauses the tree, and SceneTree.create_timer() defaults to process_always =
-## true, so a timer started there would keep ticking through the pause and drop
-## the next wave on top of the open screen. The `false` below keeps this timer
-## honest about pause too.
 func _on_upgrade_selected(_upgrade: UpgradeData) -> void:
 	if not _awaiting_upgrade:
 		return

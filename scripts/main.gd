@@ -1,12 +1,4 @@
 extends Node2D
-## Root of the playable scene. Wires the world together in code and in an order
-## that guarantees the HUD and ink overlay are listening on the bus before the
-## player emits its initial state:
-##   1. Arena (the bounded tank; the Player reads it for its camera limits)
-##   2. Entities container (group "entities") for player/enemies/projectiles/loot
-##   3. InkOverlay + HUD + UpgradeScreen (subscribe to GameEvents)
-##   4. Player (emits initial HP/ink on _ready)
-##   5. WaveManager (needs the player and the arena to already exist)
 
 const ArenaScene := preload("res://scenes/world/arena.tscn")
 const PlayerScene := preload("res://scenes/player/player.tscn")

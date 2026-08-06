@@ -1,8 +1,5 @@
 extends CharacterBody2D
 class_name EnemyBase
-## Base class for corrupted fauna. Holds HP, chases the player, deals contact
-## damage on a cooldown, and rolls a cleaning-item drop on death. Subclasses
-## (Swarmer, and later Shooter/Boss) override _load_default_data() and _move().
 
 @export var data: EnemyData
 
@@ -17,7 +14,7 @@ func _ready() -> void:
 	_load_default_data()
 	health = data.max_health if data else 20.0
 	add_to_group("enemies")
-	collision_layer = 2  # enemies
+	collision_layer = 2
 	collision_mask = 0
 
 	var col := CollisionShape2D.new()
@@ -26,7 +23,6 @@ func _ready() -> void:
 	col.shape = s
 	add_child(col)
 
-	# Contact hitbox: detects the player body (layer 1).
 	var touch := Area2D.new()
 	touch.collision_layer = 2
 	touch.collision_mask = 1
@@ -43,7 +39,6 @@ func _ready() -> void:
 	_arena = Arena.find(self)
 
 
-## Subclasses assign their default EnemyData here.
 func _load_default_data() -> void:
 	pass
 
@@ -70,7 +65,6 @@ func _physics_process(delta: float) -> void:
 	queue_redraw()
 
 
-## Default behaviour: home straight in on the player.
 func _move(_delta: float) -> void:
 	var to_player := _player.global_position - global_position
 	var dir := to_player.normalized() if to_player.length() > 1.0 else Vector2.ZERO
@@ -115,7 +109,6 @@ func _draw() -> void:
 	var c := data.body_color if data else Color(0.9, 0.4, 0.15, 1.0)
 	var r := _radius()
 	draw_circle(Vector2.ZERO, r, c)
-	# Oily corrupted core.
 	draw_circle(Vector2.ZERO, r * 0.6, Color(c.r * 0.5, c.g * 0.4, c.b * 0.3, 0.8))
 	var look := Vector2.ZERO
 	if _player and is_instance_valid(_player):

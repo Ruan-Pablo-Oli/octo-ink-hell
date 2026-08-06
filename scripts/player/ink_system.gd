@@ -1,14 +1,10 @@
 extends Node
 class_name InkSystem
-## The player's ink reservoir: ammo, mobility fuel and (via the overlay) vision,
-## all in one resource. Attached as a child of the Player. Regenerates slowly
-## after a short delay since the last shot. Cleaning pickups top it back up.
 
 @export var max_ink: float = 100.0
 @export var regen_per_sec: float = 7.0
 @export var regen_delay: float = 0.6
 
-## Set by the Player. Upgrades scale capacity and regen (Extra Gland).
 var upgrades: UpgradeSystem
 
 var current: float
@@ -30,8 +26,6 @@ func recompute() -> void:
 		return
 	const S := UpgradeEffect.Stat
 	var new_max := upgrades.value(S.INK_MAX, max_ink)
-	# Extra capacity arrives full, so the upgrade feels like a reward rather than
-	# an empty tank you have to regenerate into.
 	if new_max > _eff_max:
 		current += new_max - _eff_max
 	_eff_max = new_max
@@ -47,7 +41,6 @@ func _process(delta: float) -> void:
 		_broadcast()
 
 
-## Returns true and spends the ink if there is enough; false otherwise.
 func consume(amount: float) -> bool:
 	if amount <= 0.0:
 		return true

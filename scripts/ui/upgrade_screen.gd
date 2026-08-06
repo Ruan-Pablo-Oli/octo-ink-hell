@@ -1,23 +1,11 @@
 extends CanvasLayer
-## Between-wave upgrade draft. Listens for wave_completed, pauses the tree and
-## offers three cards; picking one emits upgrade_selected, which the
-## UpgradeSystem applies and the WaveManager waits on before starting the next
-## wave.
-##
-## Runs with PROCESS_MODE_ALWAYS: everything else is paused while this is up, so
-## without it the screen couldn't respond to its own buttons.
 
 const CARD_SIZE := Vector2(280, 210)
-## Seconds before the draft picks for you.
 const CHOICE_TIME := 15.0
-## Roulette pacing: the highlight starts snappy and eases out into the winner.
 const SPIN_FAST := 0.045
 const SPIN_SLOW := 0.34
-## How long the winning card sits highlighted before it's committed.
 const SPIN_SETTLE := 0.7
 
-## COUNTDOWN accepts input; SPINNING/SETTLING are the auto-pick playing out and
-## deliberately ignore it — once the clock runs out the choice isn't yours.
 enum Phase { IDLE, COUNTDOWN, SPINNING, SETTLING }
 
 var _root: Control
@@ -26,7 +14,7 @@ var _title: Label
 var _timer_bar: ProgressBar
 var _timer_label: Label
 var _choices: Array = []
-var _cards: Array = []  # [{ panel, style, accent }]
+var _cards: Array = []
 var _open: bool = false
 var _prev_mouse_mode: int = Input.MOUSE_MODE_VISIBLE
 
@@ -41,7 +29,7 @@ var _settle: float = 0.0
 
 
 func _ready() -> void:
-	layer = 30  # above the HUD (20) and the ink overlay (10)
+	layer = 30
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	_build()
 	_root.visible = false
@@ -53,9 +41,6 @@ func _build() -> void:
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(_root)
 
-	# Dim the battlefield. The player's own screen ink is still layered under
-	# this, so the cards sit on opaque panels to stay readable no matter how
-	# filthy the glass is.
 	var dim := ColorRect.new()
 	dim.color = Color(0.02, 0.03, 0.06, 0.82)
 	dim.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -110,7 +95,7 @@ func _build() -> void:
 	column.add_child(_cards_box)
 
 	var hint := Label.new()
-	hint.text = "click a card  ·  or press 1 / 2 / 3"
+	hint.text = "click a card, or press 1 / 2 / 3"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
 	column.add_child(hint)
@@ -120,11 +105,10 @@ func _on_wave_completed(number: int) -> void:
 	var system := UpgradeSystem.find(self)
 	_choices = UpgradePool.roll(system, 3)
 	if _choices.is_empty():
-		# Pool exhausted. Still answer, or the WaveManager waits forever.
 		GameEvents.upgrade_selected.emit(null)
 		return
 
-	_title.text = "WAVE %d CLEARED — CHOOSE AN UPGRADE" % number
+	_title.text = "WAVE %d CLEARED - CHOOSE AN UPGRADE" % number
 	for child in _cards_box.get_children():
 		_cards_box.remove_child(child)
 		child.queue_free()
@@ -141,8 +125,6 @@ func _on_wave_completed(number: int) -> void:
 
 	_open = true
 	_root.visible = true
-	# The squeegee hides the OS cursor; restore it so the player can click, and
-	# put it back exactly as it was when we close.
 	_prev_mouse_mode = Input.mouse_mode
 	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 	get_tree().paused = true
@@ -169,7 +151,7 @@ func _make_card(index: int, upgrade: UpgradeData, system: UpgradeSystem) -> Cont
 	panel.add_child(box)
 
 	var tag := Label.new()
-	tag.text = "%d · %s" % [index + 1, UpgradeData.category_name(upgrade.category)]
+	tag.text = "%d. %s" % [index + 1, UpgradeData.category_name(upgrade.category)]
 	tag.add_theme_font_size_override("font_size", 13)
 	tag.add_theme_color_override("font_color", accent)
 	box.add_child(tag)
@@ -209,8 +191,6 @@ func _on_card_unhover(index: int) -> void:
 		_refresh_cards()
 
 
-## Repaints every card from the current state. One place decides how a card
-## looks so the hover highlight and the roulette highlight can't fight.
 func _refresh_cards() -> void:
 	var spinning := _phase == Phase.SPINNING or _phase == Phase.SETTLING
 	for i in _cards.size():
@@ -248,17 +228,12 @@ func _update_timer_text() -> void:
 	_timer_label.text = "auto-pick in %ds" % ceili(_time_left)
 
 
-## Out of time: run the highlight around the cards and let it coast to a stop on
-## a random winner, so the auto-pick reads as a draw instead of the screen just
-## vanishing.
 func _start_roulette() -> void:
 	_phase = Phase.SPINNING
 	_hovered = -1
 	_timer_bar.value = 0.0
-	_timer_label.text = "out of time — drawing for you"
+	_timer_label.text = "out of time, drawing for you"
 	var target := randi() % _choices.size()
-	# Land on `target`: after N single steps from card 0 the highlight sits on
-	# N % size, so pick an N that laps a few times and ends there.
 	_spin_steps = _choices.size() * 3 + target
 	_spin_step = 0
 	_spin_index = 0
@@ -279,7 +254,6 @@ func _tick_roulette(delta: float) -> void:
 		_timer_label.text = "drew: %s" % _choices[_spin_index].display_name
 		_refresh_cards()
 		return
-	# Ease out: quadratic on progress stretches the last few steps noticeably.
 	var progress := float(_spin_step) / float(_spin_steps)
 	_spin_timer = lerpf(SPIN_FAST, SPIN_SLOW, progress * progress)
 

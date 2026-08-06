@@ -1,15 +1,11 @@
 extends Area2D
-## Bioluminescent droplet dropped by enemies. Walking over it refuels the
-## squeegee's cleaning fluid (the only way to refill it), tops up ink and heals a
-## little. It does NOT wipe the screen by itself — wiping is always active,
-## done by the player with the squeegee (see InkOverlay.wipe_at).
 
 var _t: float = 0.0
 
 
 func _ready() -> void:
-	collision_layer = 8  # pickups
-	collision_mask = 1   # player
+	collision_layer = 8
+	collision_mask = 1
 	monitoring = true
 	var col := CollisionShape2D.new()
 	var s := CircleShape2D.new()

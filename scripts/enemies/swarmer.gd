@@ -1,8 +1,5 @@
 extends EnemyBase
 class_name Swarmer
-## Fast, fragile melee horde unit. Weaves slightly on its way in so a pack reads
-## as a swarm rather than a straight line. Demonstrates the EnemyBase override
-## pattern that Shooter and Boss will follow.
 
 var _phase: float = 0.0
 

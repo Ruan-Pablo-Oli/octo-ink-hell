@@ -1,7 +1,4 @@
 extends CanvasLayer
-## HUD: HP + ink bars, current wave, screen-dirtiness readout, and a centered
-## message banner (wave/game-over). Built entirely in code and wired to the
-## GameEvents bus — it never touches the player or systems directly.
 
 var _hp_bar: ProgressBar
 var _ink_bar: ProgressBar

@@ -1,48 +1,25 @@
 extends Node
-## Global signal bus (autoload). Systems talk through these signals instead of
-## holding direct references to each other. Also registers the input actions at
-## startup so the InputMap lives in code (easier to review than project.godot).
 
-# --- Ink / vision ---------------------------------------------------------
 signal ink_changed(current: float, max_value: float)
 signal ink_depleted
-## Emitted once per shot. The InkOverlay listens to stamp a screen-space splat
-## whose shape/orientation come from the weapon + shot direction.
 signal shot_fired(direction: Vector2, weapon: WeaponData)
-## Ink spilled by something that isn't a shot — currently the damaging dash
-## trail. Same payload and same stamping path as shot_fired; kept separate so
-## "a shot went out" stays a truthful signal (weapon cooldowns, future ammo UI).
-## Anything that can KILL has to cost vision, or it routes around the whole
-## "the more you attack, the less you see" premise.
 signal ink_spilled(direction: Vector2, splat: WeaponData)
-## 0.0 = clean screen, 1.0 = fully inked over. Drives the HUD readout.
 signal screen_dirtiness_changed(value: float)
 
-# --- Cleaning (active) ----------------------------------------------------
-## Cleaning fluid reservoir spent while wiping the screen with the squeegee.
 signal cleaner_changed(current: float, max_value: float)
-## True while the player has swapped the ink spitter for the squeegee tool.
 signal clean_mode_changed(active: bool)
 
-# --- Player ---------------------------------------------------------------
 signal player_health_changed(current: float, max_value: float)
 signal player_died
 
-# --- Enemies / loot -------------------------------------------------------
 signal enemy_killed(position: Vector2)
 signal cleaning_collected
 
-# --- Waves ----------------------------------------------------------------
 signal wave_started(number: int)
 signal wave_completed(number: int)
 
-# --- Roguelite upgrades ---------------------------------------------------
-## The draft screen is showing these three choices.
 signal upgrade_offered(choices: Array)
-## A choice was made. `upgrade` is null when the pool had nothing left to offer;
-## the WaveManager waits on this signal either way, so it must always fire.
 signal upgrade_selected(upgrade: UpgradeData)
-## The player's stat modifiers changed — consumers recompute their effective values.
 signal upgrades_changed
 
 
@@ -56,8 +33,6 @@ func _setup_input() -> void:
 	_add_key_action("move_left", [KEY_A, KEY_LEFT])
 	_add_key_action("move_right", [KEY_D, KEY_RIGHT])
 	_add_key_action("dash", [KEY_SPACE, KEY_SHIFT])
-	## Left mouse = use the current tool (spit ink / wipe). Right mouse swaps
-	## between the ink spitter and the squeegee.
 	_add_mouse_action("use_tool", MOUSE_BUTTON_LEFT)
 	_add_mouse_action("toggle_tool", MOUSE_BUTTON_RIGHT)
 

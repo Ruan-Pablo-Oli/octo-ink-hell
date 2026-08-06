@@ -1,13 +1,4 @@
 extends CanvasLayer
-## The core "the more you attack, the less you see" mechanic.
-##
-## Every shot stamps an ink splat onto this screen-space layer. Splats accumulate
-## and literally cover the view — no dimming/vignette, actual ink on the glass.
-## Their shape and orientation come from the weapon + shot direction.
-##
-## Cleaning is ACTIVE: the player swaps to a squeegee and scrubs. The Player calls
-## wipe_at() each frame while wiping; this node also draws the squeegee cursor and
-## hosts it in the same screen space as the splats. It never wipes on its own.
 
 const MAX_SPLATS := 140
 const SplatScene := preload("res://scenes/effects/ink_splat.tscn")
@@ -15,11 +6,7 @@ const WiperCursorScript := preload("res://scripts/effects/wiper_cursor.gd")
 
 var _container: Node2D
 var _cursor: Node2D
-var _splats: Array = []  # [{ node, dirt }] oldest first
-## Unclamped sum of the live splats' dirt. Kept unclamped on purpose: clamping it
-## on the way up would make each wipe subtract dirt that was never counted, so a
-## saturated screen could read 0% while still caked in ink. Only the reported
-## value is clamped to 0..1.
+var _splats: Array = []
 var _dirt_total: float = 0.0
 var _clean_mode: bool = false
 
@@ -55,12 +42,9 @@ func _on_clean_mode_changed(active: bool) -> void:
 	_cursor.queue_redraw()
 
 
-## Stamps one stain for any ink the player spills — a shot or a damaging dash.
 func _stamp(direction: Vector2, weapon: WeaponData) -> void:
 	var screen := get_viewport().get_visible_rect().size
 	var center := screen * 0.5
-	# Fling the stain outward in the aim direction, with perpendicular jitter,
-	# so heavy firing in one direction cakes that side of the screen.
 	var dist := randf_range(70.0, 0.55 * minf(screen.x, screen.y))
 	var perp := Vector2(-direction.y, direction.x)
 	var pos := center + direction * dist + perp * randf_range(-70.0, 70.0)
@@ -76,13 +60,11 @@ func _stamp(direction: Vector2, weapon: WeaponData) -> void:
 	_dirt_total += weapon.splat_dirtiness
 
 	if _splats.size() > MAX_SPLATS:
-		_remove_oldest(1)  # emits the new dirtiness itself
+		_remove_oldest(1)
 	else:
 		_emit_dirtiness()
 
 
-## Wipes every stain whose centre is within `radius` of `screen_pos` and returns
-## how many were removed (so the caller can spend cleaning fluid accordingly).
 func wipe_at(screen_pos: Vector2, radius: float) -> int:
 	_cursor.wiping = true
 	var wiped := 0
@@ -107,7 +89,6 @@ func stop_wiping() -> void:
 	_cursor.wiping = false
 
 
-## Keeps the squeegee's drawn ring honest about the Player's actual wipe radius.
 func set_wipe_radius(radius: float) -> void:
 	_cursor.radius = radius
 	_cursor.queue_redraw()

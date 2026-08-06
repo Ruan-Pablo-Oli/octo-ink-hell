@@ -1,11 +1,5 @@
 extends Resource
 class_name UpgradeData
-## One pickable roguelite upgrade, offered between waves. Balancing lives in the
-## .tres files under resources/upgrades/ — same data-driven approach as
-## WeaponData/EnemyData.
-##
-## An upgrade is just a bundle of UpgradeEffects, so trade-off upgrades (buy
-## vision by paying damage) are expressed in data instead of code.
 
 enum Category { OFFENSIVE, MOBILITY, UTILITY }
 
@@ -13,7 +7,6 @@ enum Category { OFFENSIVE, MOBILITY, UTILITY }
 @export_multiline var description: String = ""
 @export var category: Category = Category.OFFENSIVE
 @export var effects: Array[UpgradeEffect] = []
-## How many times this can be taken. 0 = unlimited.
 @export var max_stacks: int = 3
 
 

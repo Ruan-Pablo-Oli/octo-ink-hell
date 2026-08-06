@@ -1,14 +1,10 @@
 extends Area2D
-## Ink projectile. Configured by Weapon._spawn via setup(). Travels in a
-## straight line, damages the first enemy it touches, then despawns. Collision
-## and visuals are built in code (scene is a stub).
 
 var _dir: Vector2 = Vector2.RIGHT
 var _speed: float = 600.0
 var _damage: float = 10.0
 var _life: float = 1.0
 var _color: Color = Color(0.85, 0.5, 1.0, 1.0)
-## Extra enemies this shot passes through before dying (Acid Ink upgrade).
 var _pierce: int = 0
 var _arena: Arena
 const RADIUS := 6.0
@@ -25,8 +21,8 @@ func setup(dir: Vector2, speed: float, damage: float, life: float, color: Color,
 
 
 func _ready() -> void:
-	collision_layer = 4  # player projectile
-	collision_mask = 2   # enemies
+	collision_layer = 4
+	collision_mask = 2
 	monitoring = true
 	var col := CollisionShape2D.new()
 	var s := CircleShape2D.new()
@@ -41,7 +37,6 @@ func _ready() -> void:
 func _physics_process(delta: float) -> void:
 	global_position += _dir * _speed * delta
 	_life -= delta
-	# Splash against the tank walls instead of flying off into nothing.
 	if _life <= 0.0 or (_arena and not _arena.contains(global_position, RADIUS)):
 		queue_free()
 
@@ -57,9 +52,6 @@ func _on_body_entered(body: Node) -> void:
 
 
 func _draw() -> void:
-	# Local +x = travel direction, so the tail trails behind. Layered alpha fakes
-	# a bioluminescent glow, and the white core keeps the shot readable against
-	# both the dark floor and the ink caking the screen.
 	var c := _color
 	draw_circle(Vector2.ZERO, RADIUS + 6.0, Color(c.r, c.g, c.b, 0.16))
 	draw_circle(Vector2.ZERO, RADIUS + 3.0, Color(c.r, c.g, c.b, 0.34))
