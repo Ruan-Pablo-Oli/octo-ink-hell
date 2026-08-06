@@ -10,7 +10,7 @@ add = 1.0
 
 [resource]
 script = ExtResource("2_omjfa")
-display_name = "Acid Ink"
-description = "Corrosive ink punches through one extra enemy."
+display_name = "Tinta Ácida"
+description = "Tinta corrosiva atravessa um inimigo a mais."
 effects = Array[ExtResource("1_s4603")]([SubResource("Resource_upm75")])
 max_stacks = 2

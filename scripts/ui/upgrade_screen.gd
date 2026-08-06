@@ -55,7 +55,7 @@ func _build() -> void:
 	_root.add_child(column)
 
 	_title = Label.new()
-	_title.text = "CHOOSE AN UPGRADE"
+	_title.text = "ESCOLHA UMA MELHORIA"
 	_title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_title.add_theme_font_size_override("font_size", 34)
 	_title.add_theme_color_override("font_color", Color.WHITE)
@@ -95,7 +95,7 @@ func _build() -> void:
 	column.add_child(_cards_box)
 
 	var hint := Label.new()
-	hint.text = "click a card, or press 1 / 2 / 3"
+	hint.text = "clique numa carta, ou aperte 1 / 2 / 3"
 	hint.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	hint.add_theme_color_override("font_color", Color(0.7, 0.75, 0.85))
 	column.add_child(hint)
@@ -108,7 +108,7 @@ func _on_wave_completed(number: int) -> void:
 		GameEvents.upgrade_selected.emit(null)
 		return
 
-	_title.text = "WAVE %d CLEARED - CHOOSE AN UPGRADE" % number
+	_title.text = "ONDA %d LIMPA - ESCOLHA UMA MELHORIA" % number
 	for child in _cards_box.get_children():
 		_cards_box.remove_child(child)
 		child.queue_free()
@@ -172,7 +172,7 @@ func _make_card(index: int, upgrade: UpgradeData, system: UpgradeSystem) -> Cont
 
 	var stacks := Label.new()
 	var owned := system.stacks_of(upgrade) if system else 0
-	stacks.text = "owned %d/%d" % [owned, upgrade.max_stacks] if upgrade.max_stacks > 0 else "owned %d" % owned
+	stacks.text = "você tem %d/%d" % [owned, upgrade.max_stacks] if upgrade.max_stacks > 0 else "você tem %d" % owned
 	stacks.add_theme_font_size_override("font_size", 13)
 	stacks.add_theme_color_override("font_color", Color(0.55, 0.6, 0.7))
 	box.add_child(stacks)
@@ -225,14 +225,14 @@ func _process(delta: float) -> void:
 
 
 func _update_timer_text() -> void:
-	_timer_label.text = "auto-pick in %ds" % ceili(_time_left)
+	_timer_label.text = "sorteio automático em %ds" % ceili(_time_left)
 
 
 func _start_roulette() -> void:
 	_phase = Phase.SPINNING
 	_hovered = -1
 	_timer_bar.value = 0.0
-	_timer_label.text = "out of time, drawing for you"
+	_timer_label.text = "tempo esgotado, sorteando pra você"
 	var target := randi() % _choices.size()
 	_spin_steps = _choices.size() * 3 + target
 	_spin_step = 0
@@ -251,7 +251,7 @@ func _tick_roulette(delta: float) -> void:
 	if _spin_step >= _spin_steps:
 		_phase = Phase.SETTLING
 		_settle = SPIN_SETTLE
-		_timer_label.text = "drew: %s" % _choices[_spin_index].display_name
+		_timer_label.text = "sorteado: %s" % _choices[_spin_index].display_name
 		_refresh_cards()
 		return
 	var progress := float(_spin_step) / float(_spin_steps)

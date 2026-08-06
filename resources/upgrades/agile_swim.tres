@@ -10,7 +10,7 @@ mult = 1.15
 
 [resource]
 script = ExtResource("2_tjddv")
-display_name = "Agile Swim"
-description = "+15% movement speed."
+display_name = "Nado Ágil"
+description = "+15% de velocidade de movimento."
 category = 1
 effects = Array[ExtResource("1_awttp")]([SubResource("Resource_p184e")])

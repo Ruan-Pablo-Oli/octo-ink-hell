@@ -10,7 +10,7 @@ mult = 1.4
 
 [resource]
 script = ExtResource("2_87pa5")
-display_name = "Wide Squeegee"
-description = "+40% wipe radius — clear more glass per stroke."
+display_name = "Rodo Largo"
+description = "+40% de raio de limpeza — mais vidro limpo por passada."
 category = 2
 effects = Array[ExtResource("1_77tub")]([SubResource("Resource_yx3a4")])

@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "Ink Spitter"
+display_name = "Arma de Tinta"
 ink_cost = 6.0
 fire_rate = 6.0
 projectile_speed = 640.0

@@ -10,7 +10,7 @@ mult = 1.5
 
 [resource]
 script = ExtResource("2_5toul")
-display_name = "Jet Propulsion"
-description = "Your dash carries you 50% further."
+display_name = "Propulsão a Jato"
+description = "Seu dash te leva 50% mais longe."
 category = 1
 effects = Array[ExtResource("1_7t3v1")]([SubResource("Resource_gnhh6")])

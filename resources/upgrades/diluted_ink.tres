@@ -19,8 +19,8 @@ mult = 0.9
 
 [resource]
 script = ExtResource("2_oa8aw")
-display_name = "Diluted Ink"
-description = "Runnier ink stains far less, but hits softer. Sight over power."
+display_name = "Tinta Diluída"
+description = "Tinta mais rala mancha bem menos, mas bate mais fraco. Visão no lugar de poder."
 category = 2
 effects = Array[ExtResource("1_i52yb")]([SubResource("Resource_lkkk3"), SubResource("Resource_7fo1a"), SubResource("Resource_0s648")])
 max_stacks = 2

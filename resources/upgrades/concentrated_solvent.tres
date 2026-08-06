@@ -10,7 +10,7 @@ mult = 0.65
 
 [resource]
 script = ExtResource("2_o3ye7")
-display_name = "Concentrated Solvent"
-description = "-35% cleaning fluid per stain wiped."
+display_name = "Solvente Concentrado"
+description = "-35% de fluido de limpeza por mancha limpa."
 category = 2
 effects = Array[ExtResource("1_y77d3")]([SubResource("Resource_1ru7r")])

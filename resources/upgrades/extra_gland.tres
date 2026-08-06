@@ -15,7 +15,7 @@ mult = 1.25
 
 [resource]
 script = ExtResource("2_ji18r")
-display_name = "Extra Gland"
-description = "+30 max ink and faster regeneration."
+display_name = "Glândula Extra"
+description = "+30 de tinta máxima e regeneração mais rápida."
 category = 2
 effects = Array[ExtResource("1_3rfa1")]([SubResource("Resource_hjpkm"), SubResource("Resource_7v3la")])

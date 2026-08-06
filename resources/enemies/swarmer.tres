@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "Swarmer"
+display_name = "Enxameador"
 max_health = 20.0
 move_speed = 120.0
 contact_damage = 8.0

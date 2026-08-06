@@ -10,6 +10,6 @@ mult = 1.3
 
 [resource]
 script = ExtResource("2_jatt5")
-display_name = "Hair Trigger"
-description = "+30% fire rate. The screen cakes up that much faster."
+display_name = "Gatilho Leve"
+description = "+30% de cadência de tiro. A tela suja na mesma velocidade."
 effects = Array[ExtResource("1_yo1rb")]([SubResource("Resource_bjhbi")])

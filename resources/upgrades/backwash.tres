@@ -10,7 +10,7 @@ mult = 0.7
 
 [resource]
 script = ExtResource("2_a6xu8")
-display_name = "Backwash"
-description = "-30% dash cooldown."
+display_name = "Contracorrente"
+description = "-30% de recarga do dash."
 category = 1
 effects = Array[ExtResource("1_dsnp7")]([SubResource("Resource_fwxo2")])

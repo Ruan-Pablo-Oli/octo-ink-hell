@@ -22,26 +22,26 @@ func _ready() -> void:
 	box.add_theme_constant_override("separation", 4)
 	root.add_child(box)
 
-	box.add_child(_label("HP"))
+	box.add_child(_label("VIDA"))
 	_hp_bar = _make_bar(Color(0.9, 0.25, 0.35))
 	box.add_child(_hp_bar)
-	box.add_child(_label("INK"))
+	box.add_child(_label("TINTA"))
 	_ink_bar = _make_bar(Color(0.35, 0.75, 0.95))
 	box.add_child(_ink_bar)
-	box.add_child(_label("CLEANER"))
+	box.add_child(_label("LIMPEZA"))
 	_cleaner_bar = _make_bar(Color(0.3, 0.9, 0.75))
 	box.add_child(_cleaner_bar)
 
-	_wave_label = _label("Wave 1")
+	_wave_label = _label("Onda 1")
 	_wave_label.add_theme_font_size_override("font_size", 22)
 	_wave_label.position = Vector2(24, 210)
 	root.add_child(_wave_label)
 
-	_dirty_label = _label("Screen inked: 0%")
+	_dirty_label = _label("Tela manchada: 0%")
 	_dirty_label.position = Vector2(24, 242)
 	root.add_child(_dirty_label)
 
-	_tool_label = _label("Tool: INK SPITTER  (right-click to swap)")
+	_tool_label = _label("Ferramenta: ARMA  (botão direito troca)")
 	_tool_label.position = Vector2(24, 266)
 	root.add_child(_tool_label)
 
@@ -83,24 +83,24 @@ func _on_cleaner(current: float, max_value: float) -> void:
 
 func _on_clean_mode(active: bool) -> void:
 	if active:
-		_tool_label.text = "Tool: SQUEEGEE  (hold left-click to wipe)"
+		_tool_label.text = "Ferramenta: RODO  (segure o botão esquerdo pra limpar)"
 		_tool_label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.85))
 	else:
-		_tool_label.text = "Tool: INK SPITTER  (right-click to swap)"
+		_tool_label.text = "Ferramenta: ARMA  (botão direito troca)"
 		_tool_label.add_theme_color_override("font_color", Color.WHITE)
 
 
 func _on_dirty(value: float) -> void:
-	_dirty_label.text = "Screen inked: %d%%" % roundi(value * 100.0)
+	_dirty_label.text = "Tela manchada: %d%%" % roundi(value * 100.0)
 
 
 func _on_wave_started(number: int) -> void:
-	_wave_label.text = "Wave %d" % number
-	_flash("WAVE %d" % number)
+	_wave_label.text = "Onda %d" % number
+	_flash("ONDA %d" % number)
 
 
 func _on_wave_completed(number: int) -> void:
-	_flash("Wave %d cleared!" % number)
+	_flash("Onda %d limpa!" % number)
 
 
 func _on_upgrades_changed() -> void:
@@ -116,7 +116,7 @@ func _on_upgrades_changed() -> void:
 
 
 func _on_died() -> void:
-	_msg_label.text = "GAME OVER\nrestarting..."
+	_msg_label.text = "FIM DE JOGO\nreiniciando..."
 	_msg_label.modulate.a = 1.0
 
 

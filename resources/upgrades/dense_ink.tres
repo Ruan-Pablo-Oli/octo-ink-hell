@@ -14,6 +14,6 @@ mult = 1.1
 
 [resource]
 script = ExtResource("2_4uoum")
-display_name = "Dense Ink"
-description = "Thicker ink hits harder — and leaves a bigger stain on the glass."
+display_name = "Tinta Densa"
+description = "Tinta mais grossa bate mais forte — e deixa uma mancha maior no vidro."
 effects = Array[ExtResource("1_tvj6p")]([SubResource("Resource_bquwc"), SubResource("Resource_ew3x6")])

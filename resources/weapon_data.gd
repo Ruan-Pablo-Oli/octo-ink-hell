@@ -1,7 +1,7 @@
 extends Resource
 class_name WeaponData
 
-@export var display_name: String = "Weapon"
+@export var display_name: String = "Arma"
 
 @export var ink_cost: float = 6.0
 @export var fire_rate: float = 6.0

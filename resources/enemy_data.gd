@@ -1,7 +1,7 @@
 extends Resource
 class_name EnemyData
 
-@export var display_name: String = "Enemy"
+@export var display_name: String = "Inimigo"
 @export var max_health: float = 20.0
 @export var move_speed: float = 120.0
 @export var contact_damage: float = 8.0

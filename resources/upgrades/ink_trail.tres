@@ -10,8 +10,8 @@ add = 1.0
 
 [resource]
 script = ExtResource("2_w4j28")
-display_name = "Ink Trail"
-description = "Your dash leaves a trail of ink that burns enemies who touch it."
+display_name = "Rastro de Tinta"
+description = "Seu dash deixa um rastro de tinta que queima os inimigos que encostam nele."
 category = 1
 effects = Array[ExtResource("1_w825w")]([SubResource("Resource_m3i4e")])
 max_stacks = 1

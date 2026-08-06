@@ -15,7 +15,7 @@ mult = 1.35
 
 [resource]
 script = ExtResource("2_nokj2")
-display_name = "Triple Jet"
-description = "Spit two extra projectiles per shot. Thirsty work."
+display_name = "Jato Triplo"
+description = "Cospe dois projéteis a mais por tiro. Dá sede."
 effects = Array[ExtResource("1_6x1if")]([SubResource("Resource_e228g"), SubResource("Resource_suve3")])
 max_stacks = 2

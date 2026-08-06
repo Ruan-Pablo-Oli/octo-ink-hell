@@ -3,7 +3,7 @@ class_name UpgradeData
 
 enum Category { OFFENSIVE, MOBILITY, UTILITY }
 
-@export var display_name: String = "Upgrade"
+@export var display_name: String = "Melhoria"
 @export_multiline var description: String = ""
 @export var category: Category = Category.OFFENSIVE
 @export var effects: Array[UpgradeEffect] = []
@@ -13,11 +13,11 @@ enum Category { OFFENSIVE, MOBILITY, UTILITY }
 static func category_name(cat: Category) -> String:
 	match cat:
 		Category.OFFENSIVE:
-			return "OFFENSIVE"
+			return "OFENSIVA"
 		Category.MOBILITY:
-			return "MOBILITY"
+			return "MOBILIDADE"
 		_:
-			return "UTILITY"
+			return "UTILIDADE"
 
 
 static func category_color(cat: Category) -> Color:
