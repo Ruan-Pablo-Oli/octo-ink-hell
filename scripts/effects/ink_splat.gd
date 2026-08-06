@@ -5,6 +5,8 @@ var _size: float = 40.0
 var _droplets: int = 6
 var _style: String = "streak"
 var _blobs: Array = []
+var _core_count: int = 0
+var _wear: float = 0.0
 
 
 func setup(angle: float, weapon: WeaponData) -> void:
@@ -17,9 +19,18 @@ func setup(angle: float, weapon: WeaponData) -> void:
 	queue_redraw()
 
 
+func set_wear(amount: float) -> void:
+	_wear = clampf(amount, 0.0, 1.0)
+	var keep := _core_count + int(round(_droplets * (1.0 - _wear)))
+	if _blobs.size() > keep:
+		_blobs.resize(keep)
+	queue_redraw()
+
+
 func _generate() -> void:
 	_blobs.clear()
 	var core := maxi(2, int(_size / 12.0))
+	_core_count = core
 	for i in core:
 		var o := Vector2(randf_range(-_size * 0.25, _size * 0.25), randf_range(-_size * 0.35, _size * 0.35))
 		_blobs.append({"pos": o, "r": randf_range(_size * 0.4, _size * 0.65)})
@@ -36,10 +47,13 @@ func _generate() -> void:
 
 
 func _draw() -> void:
+	var fade := 1.0 - _wear * 0.55
+	var shrink := 1.0 - _wear * 0.3
+	var body := Color(_color.r, _color.g, _color.b, _color.a * fade)
 	for b in _blobs:
-		draw_circle(b.pos, b.r * 1.25, Color(_color.r, _color.g, _color.b, _color.a * 0.28))
-	var rim := _color.lightened(0.45)
-	rim.a = _color.a * 0.55
+		draw_circle(b.pos, b.r * 1.25 * shrink, Color(body.r, body.g, body.b, body.a * 0.28))
+	var rim := body.lightened(0.45)
+	rim.a = body.a * 0.55
 	for b in _blobs:
-		draw_circle(b.pos, b.r * 1.07, rim)
-		draw_circle(b.pos, b.r, _color)
+		draw_circle(b.pos, b.r * 1.07 * shrink, rim)
+		draw_circle(b.pos, b.r * shrink, body)

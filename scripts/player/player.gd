@@ -9,7 +9,7 @@ enum Tool { ATTACK, CLEAN }
 @export var dash_time: float = 0.14
 @export var dash_cooldown: float = 0.7
 @export var wipe_radius: float = 55.0
-@export var wipe_cost: float = 4.0
+@export var wipe_cost: float = 2.0  ## por passada; uma mancha inteira custa WIPE_PASSES vezes isso
 
 const InkTrailScene := preload("res://scenes/effects/ink_trail.tscn")
 const DashInkData := preload("res://resources/weapons/dash_ink.tres")

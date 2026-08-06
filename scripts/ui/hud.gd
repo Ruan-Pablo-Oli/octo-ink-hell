@@ -83,7 +83,7 @@ func _on_cleaner(current: float, max_value: float) -> void:
 
 func _on_clean_mode(active: bool) -> void:
 	if active:
-		_tool_label.text = "Ferramenta: RODO  (segure o botão esquerdo pra limpar)"
+		_tool_label.text = "Ferramenta: RODO  (esfregue as manchas até sumirem)"
 		_tool_label.add_theme_color_override("font_color", Color(0.3, 0.95, 0.85))
 	else:
 		_tool_label.text = "Ferramenta: ARMA  (botão direito troca)"

@@ -1,6 +1,7 @@
 extends CanvasLayer
 
 const MAX_SPLATS := 140
+const WIPE_PASSES := 3
 const SplatScene := preload("res://scenes/effects/ink_splat.tscn")
 const WiperCursorScript := preload("res://scripts/effects/wiper_cursor.gd")
 
@@ -56,7 +57,13 @@ func _stamp(direction: Vector2, weapon: WeaponData) -> void:
 	splat.position = pos
 	splat.setup(direction.angle(), weapon)
 
-	_splats.append({"node": splat, "dirt": weapon.splat_dirtiness})
+	_splats.append({
+		"node": splat,
+		"dirt": weapon.splat_dirtiness,
+		"passes": WIPE_PASSES,
+		"left": WIPE_PASSES,
+		"contact": false,
+	})
 	_dirt_total += weapon.splat_dirtiness
 
 	if _splats.size() > MAX_SPLATS:
@@ -65,28 +72,46 @@ func _stamp(direction: Vector2, weapon: WeaponData) -> void:
 		_emit_dirtiness()
 
 
+## Cada passada do rodo tira uma camada da mancha. Uma mancha so sai depois de
+## WIPE_PASSES passadas, e so conta passada nova quando ela sai do raio e volta
+## (ou quando o jogador solta o botao), entao parar em cima nao adianta.
 func wipe_at(screen_pos: Vector2, radius: float) -> int:
 	_cursor.wiping = true
-	var wiped := 0
+	var scrubbed := 0
 	var remaining: Array = []
 	for entry in _splats:
 		var node: Node2D = entry.node
-		if is_instance_valid(node) and node.position.distance_to(screen_pos) <= radius:
-			_dirt_total = maxf(0.0, _dirt_total - entry.dirt)
+		if not is_instance_valid(node):
+			continue
+		if node.position.distance_to(screen_pos) > radius:
+			entry.contact = false
+			remaining.append(entry)
+			continue
+		if entry.contact:
+			remaining.append(entry)
+			continue
+
+		entry.contact = true
+		entry.left -= 1
+		scrubbed += 1
+		_dirt_total = maxf(0.0, _dirt_total - entry.dirt / float(entry.passes))
+		if entry.left > 0:
+			node.set_wear(1.0 - float(entry.left) / float(entry.passes))
+			remaining.append(entry)
+		else:
 			var tw := node.create_tween()
 			tw.tween_property(node, "modulate:a", 0.0, 0.15)
 			tw.tween_callback(node.queue_free)
-			wiped += 1
-		else:
-			remaining.append(entry)
 	_splats = remaining
-	if wiped > 0:
+	if scrubbed > 0:
 		_emit_dirtiness()
-	return wiped
+	return scrubbed
 
 
 func stop_wiping() -> void:
 	_cursor.wiping = false
+	for entry in _splats:
+		entry.contact = false
 
 
 func set_wipe_radius(radius: float) -> void:
@@ -99,7 +124,7 @@ func _remove_oldest(count: int) -> void:
 		if _splats.is_empty():
 			break
 		var entry: Dictionary = _splats.pop_front()
-		_dirt_total = maxf(0.0, _dirt_total - entry.dirt)
+		_dirt_total = maxf(0.0, _dirt_total - entry.dirt * float(entry.left) / float(entry.passes))
 		var node: Node2D = entry.node
 		if is_instance_valid(node):
 			node.queue_free()
