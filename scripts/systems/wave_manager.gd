@@ -14,7 +14,6 @@ const SPAWN_MARGIN := 60.0
 @export var spawn_max_dist: float = 720.0
 
 var wave: int = 0
-var _alive: int = 0
 var _to_spawn: int = 0
 var _spawn_timer: float = 0.0
 var _running: bool = false
@@ -32,7 +31,6 @@ func _ready() -> void:
 func _start_next_wave() -> void:
 	wave += 1
 	_to_spawn = base_count + per_wave * (wave - 1)
-	_alive = _to_spawn
 	_spawn_timer = 0.0
 	_running = true
 	GameEvents.wave_started.emit(wave)
@@ -74,7 +72,7 @@ func _spawn_one() -> void:
 
 	var scene
 
-	# Os primeiros spawns da wave serão Shooters.
+	# Os últimos spawns da wave serão Shooters (_to_spawn é decrescente).
 	if _to_spawn <= shooters:
 		scene = ShooterScene
 	else:
@@ -105,11 +103,26 @@ func _spawn_position() -> Vector2:
 
 
 func _on_enemy_killed(_pos: Vector2) -> void:
-	_alive -= 1
-	if _running and _alive <= 0 and _to_spawn <= 0:
-		_running = false
-		_awaiting_upgrade = true
-		GameEvents.wave_completed.emit(wave)
+	if not _running or _to_spawn > 0 or _living_enemies() > 0:
+		return
+	_running = false
+	_awaiting_upgrade = true
+	GameEvents.wave_completed.emit(wave)
+
+
+## Conta o que esta vivo de verdade em vez de confiar num contador: assim a wave
+## nunca termina com inimigo em campo, independente de quantas vezes o sinal de
+## morte chegar. Quem acabou de morrer ainda esta no grupo quando o sinal chega
+## (queue_free e adiado), dai o is_dead()/is_queued_for_deletion().
+func _living_enemies() -> int:
+	var count := 0
+	for enemy in get_tree().get_nodes_in_group("enemies"):
+		if not is_instance_valid(enemy) or enemy.is_queued_for_deletion():
+			continue
+		if enemy.has_method("is_dead") and enemy.is_dead():
+			continue
+		count += 1
+	return count
 
 
 func _on_upgrade_selected(_upgrade: UpgradeData) -> void:

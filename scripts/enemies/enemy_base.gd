@@ -8,6 +8,7 @@ var _player: Node2D
 var _arena: Arena
 var _touching_player: bool = false
 var _touch_cd: float = 0.0
+var _dead: bool = false
 
 
 func _ready() -> void:
@@ -71,7 +72,16 @@ func _move(_delta: float) -> void:
 	velocity = dir * (data.move_speed if data else 120.0)
 
 
+func is_dead() -> bool:
+	return _dead
+
+
 func take_damage(amount: float) -> void:
+	## queue_free() so acontece no fim do frame, entao o inimigo ainda pode levar
+	## dano depois de morto (tiro perfurante, rastro de tinta, varios projeteis
+	## no mesmo frame). Sem essa guarda ele morre mais de uma vez.
+	if _dead:
+		return
 	health -= amount
 	if health <= 0.0:
 		_die()
@@ -80,6 +90,7 @@ func take_damage(amount: float) -> void:
 
 
 func _die() -> void:
+	_dead = true
 	GameEvents.enemy_killed.emit(global_position)
 	if data and randf() < data.clean_drop_chance:
 		_drop_clean()
