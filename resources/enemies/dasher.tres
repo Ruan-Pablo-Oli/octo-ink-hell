@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://dx74tkud25ckw"]
+
+[ext_resource type="Script" uid="uid://8twel2doh3k1" path="res://resources/enemy_data.gd" id="1"]
+
+[resource]
+script = ExtResource("1")
+display_name = "Enxameador"
+body_color = Color(0.11693796, 0.48438346, 0, 1)

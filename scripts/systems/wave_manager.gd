@@ -2,6 +2,7 @@ extends Node
 
 const SwarmerScene := preload("res://scenes/enemies/swarmer.tscn")
 const ShooterScene := preload("res://scenes/enemies/shooter.tscn")
+const DasherScene := preload("res://scenes/enemies/dasher.tscn")
 ## Keeps spawns off the wall itself.
 
 const SPAWN_MARGIN := 60.0
@@ -57,6 +58,7 @@ func _spawn_one() -> void:
 		entities = get_tree().current_scene
 
 	var shooters := 0
+	var dashers := 0
 
 	match wave:
 		1:
@@ -70,10 +72,16 @@ func _spawn_one() -> void:
 		_:
 			shooters = min(5, wave - 1)
 
+	if wave >= 3:
+		dashers = min(4, wave - 2)
+
 	var scene
 
-	# Os últimos spawns da wave serão Shooters (_to_spawn é decrescente).
-	if _to_spawn <= shooters:
+	# _to_spawn é decrescente: as últimas vagas da wave viram dasher,
+	# depois shooter, o resto swarmer.
+	if _to_spawn <= dashers:
+		scene = DasherScene
+	elif _to_spawn <= dashers + shooters:
 		scene = ShooterScene
 	else:
 		scene = SwarmerScene
@@ -81,7 +89,6 @@ func _spawn_one() -> void:
 	var enemy = scene.instantiate()
 	entities.add_child(enemy)
 	enemy.global_position = _spawn_position()
-
 
 func _spawn_position() -> Vector2:
 	var arena := Arena.find(self)
