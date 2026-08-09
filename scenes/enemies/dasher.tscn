@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bnqqk7o4wybut"]
+
+[ext_resource type="Script" uid="uid://lprbl8cr52yn" path="res://scripts/enemies/dasher.gd" id="1_jhw8m"]
+
+[node name="Dasher" type="CharacterBody2D" unique_id=644401973]
+script = ExtResource("1_jhw8m")
