@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://c4idnd1l42q8a"]
+
+[ext_resource type="Script" uid="uid://8twel2doh3k1" path="res://resources/enemy_data.gd" id="1_j1ke2"]
+
+[resource]
+script = ExtResource("1_j1ke2")
+display_name = "Atirador de Laser"
+body_color = Color(0.42655063, 0.0020118654, 0.7104016, 1)

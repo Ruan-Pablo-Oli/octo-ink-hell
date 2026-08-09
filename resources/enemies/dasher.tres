@@ -4,5 +4,5 @@
 
 [resource]
 script = ExtResource("1")
-display_name = "Enxameador"
+display_name = "Corredor"
 body_color = Color(0.11693796, 0.48438346, 0, 1)
