@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://cx8ntnjt6lru3"]
+
+[ext_resource type="Script" uid="uid://dxqk6nvqnekrd" path="res://scripts/enemies/laser_shooter.gd" id="1_t32l6"]
+
+[node name="Laser_shooter" type="CharacterBody2D" unique_id=2084239633]
+script = ExtResource("1_t32l6")
