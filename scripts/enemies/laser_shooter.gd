@@ -1,14 +1,15 @@
 extends EnemyBase
 class_name LaserShooter
 
-@export var laser_range: float = 900.0
+@export var laser_range: float = 2000.0
 @export var laser_width: float = 14.0
 @export var laser_damage: float = 15.0
 @export var telegraph_duration: float = 0.8
 @export var fire_flash_duration: float = 0.15
-@export var cooldown_min: float = 1.8
-@export var cooldown_max: float = 3.0
+@export var cooldown_min: float = 1.0
+@export var cooldown_max: float = 2.0
 @export var preferred_distance: float = 380.0
+@export var aim_prediction_time: float = 0.35
 
 enum State { IDLE, AIMING, FIRING }
 
@@ -54,9 +55,18 @@ func _move_idle() -> void:
 func _start_aiming() -> void:
 	_state = State.AIMING
 	_state_timer = telegraph_duration
-	_laser_dir = (_player.global_position - global_position).normalized()
 	_has_damaged = false
 	velocity = Vector2.ZERO
+
+	var player_position := _player.global_position
+	var player_velocity := Vector2.ZERO
+
+	if _player is CharacterBody2D:
+		player_velocity = _player.velocity
+
+	var predicted_position := player_position + player_velocity * aim_prediction_time
+
+	_laser_dir = (predicted_position - global_position).normalized()
 
 func _fire() -> void:
 	_state = State.FIRING

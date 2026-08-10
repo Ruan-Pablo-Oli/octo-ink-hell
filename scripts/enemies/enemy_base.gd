@@ -16,7 +16,7 @@ func _ready() -> void:
 	health = data.max_health if data else 20.0
 	add_to_group("enemies")
 	collision_layer = 2
-	collision_mask = 0
+	collision_mask = 2
 
 	var col := CollisionShape2D.new()
 	var s := CircleShape2D.new()

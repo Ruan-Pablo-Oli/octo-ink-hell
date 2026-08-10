@@ -1,10 +1,10 @@
 extends EnemyBase
 class_name Dasher
 
-@export var dash_speed_mult: float = 5.0
+@export var dash_speed_mult: float = 4.5
 @export var dash_duration: float = 0.3
-@export var dash_cooldown_min: float = 1.0
-@export var dash_cooldown_max: float = 2.5
+@export var dash_cooldown_min: float = 0.8
+@export var dash_cooldown_max: float = 1.2
 
 var _is_dashing: bool = false
 var _dash_time_left: float = 0.0

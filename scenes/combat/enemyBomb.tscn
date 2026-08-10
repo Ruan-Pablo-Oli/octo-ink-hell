@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://crhd72rofqu70"]
+
+[ext_resource type="Script" uid="uid://dlwmvkpkxclwd" path="res://scripts/combat/enemyBomb.gd" id="1_e36nv"]
+
+[node name="BombProjectile" type="Area2D" unique_id=1777119811]
+script = ExtResource("1_e36nv")

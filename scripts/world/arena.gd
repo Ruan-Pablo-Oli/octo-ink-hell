@@ -19,8 +19,11 @@ func bounds() -> Rect2:
 
 
 func contains(point: Vector2, margin: float = 0.0) -> bool:
-	return bounds().grow(-margin).has_point(point)
-
+	var global_bounds := Rect2(
+		global_position - size * 0.5,
+		size
+	)
+	return global_bounds.grow(-margin).has_point(point)
 
 func clamp_position(point: Vector2, radius: float = 0.0) -> Vector2:
 	var b := bounds().grow(-radius)

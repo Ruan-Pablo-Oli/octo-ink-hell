@@ -3,7 +3,7 @@ class_name EnemyProjectile
 var _dir: Vector2 = Vector2.RIGHT
 var _speed: float = 250.0
 var _damage: float = 10.0
-var _life: float = 5.0
+var _life: float = 15.0
 var _color: Color = Color.RED
 var _arena: Arena
 const RADIUS := 6.0
@@ -32,11 +32,14 @@ func _ready() -> void:
 	body_entered.connect(_on_body_entered)
 	rotation = _dir.angle()
 	_arena = Arena.find(self)
+	
 func _physics_process(delta: float) -> void:
 	global_position += _dir * _speed * delta
-	_life -= delta
-	if _life <= 0.0 or (_arena and not _arena.contains(global_position, RADIUS)):
+#
+	if _arena and not _arena.contains(global_position, RADIUS):
 		queue_free()
+		return
+		
 func _on_body_entered(body: Node) -> void:
 	if body.is_in_group("player") and body.has_method("take_damage"):
 		body.take_damage(_damage)
