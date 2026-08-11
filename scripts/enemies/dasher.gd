@@ -1,8 +1,10 @@
 extends EnemyBase
 class_name Dasher
 
+const DASHER_LAYER := 64
+
 @export var dash_speed_mult: float = 4.5
-@export var dash_duration: float = 0.3
+@export var dash_duration: float = 0.5
 @export var dash_cooldown_min: float = 0.8
 @export var dash_cooldown_max: float = 1.2
 
@@ -15,6 +17,12 @@ func _load_default_data() -> void:
 	if data == null:
 		data = preload("res://resources/enemies/dasher.tres")
 	_dash_timer = randf_range(dash_cooldown_min, dash_cooldown_max)
+
+func _physics_collision_layer() -> int:
+	return DASHER_LAYER
+
+func _physics_collision_mask() -> int:
+	return DASHER_LAYER
 
 func _move(delta: float) -> void:
 	if _is_dashing:

@@ -11,7 +11,7 @@ const SPAWN_MARGIN := 60.0
 
 @export var base_count: int = 8
 @export var per_wave: int = 3
-@export var spawn_interval: float = 0.35
+@export var spawn_interval: float = 0.2
 @export var wave_break: float = 1.2
 @export var spawn_min_dist: float = 520.0
 @export var spawn_max_dist: float = 720.0
