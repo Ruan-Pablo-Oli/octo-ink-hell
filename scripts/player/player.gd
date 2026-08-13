@@ -9,16 +9,17 @@ enum Tool { ATTACK, CLEAN }
 @export var dash_time: float = 0.14
 @export var dash_cooldown: float = 0.7
 @export var wipe_radius: float = 55.0
-@export var wipe_cost: float = 2.0  ## por passada; uma mancha inteira custa WIPE_PASSES vezes isso
+@export var wipe_cost: float = 1.5  ## por passada; uma mancha inteira custa WIPE_PASSES vezes isso
 
 @export_group("Sprites")
 @export var sprite_top_left: Texture2D
 @export var sprite_top_right: Texture2D
 @export var sprite_bottom_left: Texture2D
 @export var sprite_bottom_right: Texture2D
-@export var sprite_scale_mult: float = 4.0
+@export var sprite_scale_mult: float = 4.
 
-const WeaponScene := preload("res://scenes/player/weapon.tscn")
+const LaserWeaponScene := preload("res://scenes/player/weapon/laser_weapon.tscn");
+const WeaponScene := preload("res://scenes/player/weapon/weapon.tscn");
 const InkTrailScene := preload("res://scenes/effects/ink_trail.tscn")
 const DashInkData := preload("res://resources/weapons/dash_ink.tres")
 const TRAIL_INTERVAL := 0.035
@@ -31,6 +32,8 @@ enum FacingDir { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 var health: float
 var ink: InkSystem
 var cleaner: CleanerSystem
+var weapons: Array[Weapon] = []
+var current_weapon_index: int = 0
 var weapon: Weapon
 var upgrades: UpgradeSystem
 
@@ -84,10 +87,22 @@ func _ready() -> void:
 	cleaner.name = "CleanerSystem"
 	add_child(cleaner)
 
-	weapon = WeaponScene.instantiate()
-	weapon.name = "Weapon"
-	weapon.upgrades = upgrades
-	add_child(weapon)
+	var basic_weapon := WeaponScene.instantiate() as Weapon
+	basic_weapon.name = "BasicWeapon"
+	basic_weapon.upgrades = upgrades
+	add_child(basic_weapon)
+
+	var laser_weapon := LaserWeaponScene.instantiate() as Weapon
+	laser_weapon.name = "LaserWeapon"
+	laser_weapon.upgrades = upgrades
+	add_child(laser_weapon)
+
+	weapons = [
+		basic_weapon,
+		laser_weapon
+	]
+
+	weapon = weapons[current_weapon_index]
 
 	_dash_splat = DashInkData.duplicate() as WeaponData
 	_recompute()
@@ -152,7 +167,14 @@ func _emit_initial() -> void:
 	cleaner.broadcast()
 	_set_tool(Tool.ATTACK)
 
+func _switch_weapon() -> void:
+	if weapons.is_empty():
+		return
 
+	current_weapon_index = (current_weapon_index + 1) % weapons.size()
+	weapon = weapons[current_weapon_index]
+
+	print("Weapon: ", weapon.name)
 func _physics_process(delta: float) -> void:
 	if not _alive:
 		return
@@ -161,7 +183,10 @@ func _physics_process(delta: float) -> void:
 	var to_mouse := get_global_mouse_position() - global_position
 	if to_mouse.length() > 0.001:
 		_aim_dir = to_mouse.normalized()
-
+	
+	if Input.is_action_just_pressed("switch_weapon"):
+		_switch_weapon()
+	
 	if Input.is_action_just_pressed("toggle_tool"):
 		_set_tool(Tool.ATTACK if _tool == Tool.CLEAN else Tool.CLEAN)
 
