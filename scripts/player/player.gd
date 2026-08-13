@@ -11,10 +11,20 @@ enum Tool { ATTACK, CLEAN }
 @export var wipe_radius: float = 55.0
 @export var wipe_cost: float = 2.0  ## por passada; uma mancha inteira custa WIPE_PASSES vezes isso
 
+@export_group("Sprites")
+@export var sprite_top_left: Texture2D
+@export var sprite_top_right: Texture2D
+@export var sprite_bottom_left: Texture2D
+@export var sprite_bottom_right: Texture2D
+@export var sprite_scale_mult: float = 4.0
+
+const WeaponScene := preload("res://scenes/player/weapon.tscn")
 const InkTrailScene := preload("res://scenes/effects/ink_trail.tscn")
 const DashInkData := preload("res://resources/weapons/dash_ink.tres")
 const TRAIL_INTERVAL := 0.035
 const BODY_RADIUS := 18.0
+
+enum FacingDir { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 
 var health: float
 var ink: InkSystem
@@ -40,6 +50,10 @@ var _eff_wipe_cost: float
 var _dash_trail: bool = false
 var _arena: Arena
 var _dash_splat: WeaponData
+
+var _sprite: Sprite2D
+var _facing: FacingDir = FacingDir.BOTTOM_RIGHT
+var _has_sprites: bool = false
 
 
 func _ready() -> void:
@@ -69,7 +83,7 @@ func _ready() -> void:
 	cleaner.name = "CleanerSystem"
 	add_child(cleaner)
 
-	weapon = Weapon.new()
+	weapon = WeaponScene.instantiate()
 	weapon.name = "Weapon"
 	weapon.upgrades = upgrades
 	add_child(weapon)
@@ -90,10 +104,29 @@ func _ready() -> void:
 	add_child(cam)
 	cam.make_current()
 
+	_setup_sprite()
 	_get_overlay()
 	GameEvents.cleaning_collected.connect(func() -> void: _heal(5.0))
 	call_deferred("_emit_initial")
 
+
+func _setup_sprite() -> void:
+	_has_sprites = sprite_top_left != null and sprite_top_right != null \
+		and sprite_bottom_left != null and sprite_bottom_right != null
+	if not _has_sprites:
+		return
+	_sprite = Sprite2D.new()
+	_sprite.texture = sprite_bottom_right
+	_sprite.scale = Vector2.ONE * _sprite_base_scale() * sprite_scale_mult
+	add_child(_sprite)
+
+
+func _sprite_base_scale() -> float:
+	var tex_size := sprite_bottom_right.get_size()
+	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
+		return 1.0
+	var target_diameter := BODY_RADIUS * 2.0
+	return target_diameter / max(tex_size.x, tex_size.y)
 
 func _recompute() -> void:
 	const S := UpgradeEffect.Stat
@@ -164,8 +197,41 @@ func _physics_process(delta: float) -> void:
 		elif _overlay:
 			_overlay.stop_wiping()
 
+	_update_facing_sprite()
 	_wiggle += delta
 	queue_redraw()
+
+
+func _update_facing_sprite() -> void:
+	if not _has_sprites:
+		return
+	# 4 quadrantes diagonais pelo sinal de X/Y do aim_dir.
+	# Y negativo = topo, Y positivo = baixo (eixo Y aponta pra baixo no 2D).
+	var is_top := _aim_dir.y < 0.0
+	var is_right := _aim_dir.x >= 0.0
+
+	var new_facing: FacingDir
+	if is_top and is_right:
+		new_facing = FacingDir.TOP_RIGHT
+	elif is_top and not is_right:
+		new_facing = FacingDir.TOP_LEFT
+	elif not is_top and is_right:
+		new_facing = FacingDir.BOTTOM_RIGHT
+	else:
+		new_facing = FacingDir.BOTTOM_LEFT
+
+	if new_facing == _facing:
+		return
+	_facing = new_facing
+	match _facing:
+		FacingDir.TOP_LEFT:
+			_sprite.texture = sprite_top_left
+		FacingDir.TOP_RIGHT:
+			_sprite.texture = sprite_top_right
+		FacingDir.BOTTOM_LEFT:
+			_sprite.texture = sprite_bottom_left
+		FacingDir.BOTTOM_RIGHT:
+			_sprite.texture = sprite_bottom_right
 
 
 func _set_tool(next_tool: Tool) -> void:
@@ -234,6 +300,8 @@ func _die() -> void:
 
 
 func _draw() -> void:
+	if _has_sprites:
+		return
 	var t := _wiggle
 	for i in 8:
 		var ang := TAU * i / 8.0 + sin(t * 3.0 + i) * 0.15
