@@ -7,19 +7,28 @@ class_name Weapon
 @export var sprite_bottom_left: Texture2D
 @export var sprite_bottom_right: Texture2D
 @export var sprite_scale_mult: float = 7.0
-@export var sprite_offset: float = 22.0  ## distancia do centro do player ate a arma
+@export var sprite_offset: float = 20.0  ## distancia do centro do player ate a arma
 @export var sprite_z_index: int = 1  ## acima do player (z_index 0 por padrao)
 @export var sprite_rotation_mult: float = 0.1  ## 1.0 = giro total (+-45), 0.0 = sem giro
+
+@export_group("Muzzle")
+## Ponto da ponta do cano em pixels, relativo ao CENTRO de cada textura
+## (Sprite2D e centered por padrao, entao (0,0) = centro da imagem).
+@export var muzzle_point_top_left: Vector2 = Vector2.ZERO
+@export var muzzle_point_top_right: Vector2 = Vector2.ZERO
+@export var muzzle_point_bottom_left: Vector2 = Vector2.ZERO
+@export var muzzle_point_bottom_right: Vector2 = Vector2.ZERO
 
 const ProjectileScene := preload("res://scenes/combat/projectile.tscn")
 
 enum FacingDir { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 
+@onready var _sprite: Sprite2D = $Sprite2D
+
 var upgrades: UpgradeSystem
 var runtime: WeaponData
 var _cooldown: float = 0.0
 var _pierce: int = 0
-var _sprite: Sprite2D
 var _has_sprites: bool = false
 var _facing: FacingDir = FacingDir.BOTTOM_RIGHT
 
@@ -35,14 +44,14 @@ func _setup_sprite() -> void:
 	_has_sprites = sprite_top_left != null and sprite_top_right != null \
 		and sprite_bottom_left != null and sprite_bottom_right != null
 	if not _has_sprites:
+		_sprite.visible = false
 		return
-	_sprite = Sprite2D.new()
+	_sprite.visible = true
 	_sprite.texture = sprite_bottom_right
 	_sprite.scale = Vector2.ONE * _sprite_base_scale(sprite_bottom_right) * sprite_scale_mult
 	_sprite.z_index = sprite_z_index
 	_sprite.z_as_relative = true
-	add_child(_sprite)
-	
+
 func _sprite_base_scale(tex: Texture2D) -> float:
 	var tex_size := tex.get_size()
 	if tex_size.x <= 0.0 or tex_size.y <= 0.0:
@@ -111,8 +120,25 @@ func _update_facing_sprite() -> void:
 		_sprite.texture = tex
 		_sprite.scale = Vector2.ONE * _sprite_base_scale(tex) * sprite_scale_mult
 
-	# gira dentro do quadrante (-45 a +45 graus) pra acompanhar o mouse com precisao
 	_sprite.rotation = wrapf(mouse_angle - center_angle, -PI, PI) * sprite_rotation_mult
+
+func _current_muzzle_point() -> Vector2:
+	match _facing:
+		FacingDir.TOP_LEFT:
+			return muzzle_point_top_left
+		FacingDir.TOP_RIGHT:
+			return muzzle_point_top_right
+		FacingDir.BOTTOM_LEFT:
+			return muzzle_point_bottom_left
+		FacingDir.BOTTOM_RIGHT:
+			return muzzle_point_bottom_right
+	return Vector2.ZERO
+
+func _muzzle_world_position(origin: Vector2) -> Vector2:
+	if _has_sprites:
+		return _sprite.to_global(_current_muzzle_point())
+	return origin
+
 func try_fire(origin: Vector2, direction: Vector2, ink: InkSystem) -> bool:
 	if runtime == null or _cooldown > 0.0:
 		return false
@@ -131,9 +157,7 @@ func _spawn(origin: Vector2, direction: Vector2) -> void:
 	var base_ang := direction.angle()
 	var n := maxi(1, runtime.projectiles_per_shot)
 	var spread := deg_to_rad(runtime.spread_deg)
-	var base_dist: float = sprite_offset if _has_sprites else 20.0
-	var muzzle_dist: float = base_dist 
-	
+	var muzzle_pos := _muzzle_world_position(origin)
 	for i in n:
 		var off := 0.0
 		if n > 1:
@@ -143,6 +167,6 @@ func _spawn(origin: Vector2, direction: Vector2) -> void:
 		var dir := Vector2.RIGHT.rotated(base_ang + off)
 		var p := ProjectileScene.instantiate()
 		entities.add_child(p)
-		p.global_position = origin + dir * muzzle_dist
+		p.global_position = muzzle_pos
 		p.setup(dir, runtime.projectile_speed, runtime.projectile_damage,
 			runtime.projectile_lifetime, runtime.projectile_color, _pierce)

@@ -26,6 +26,8 @@ const BODY_RADIUS := 18.0
 
 enum FacingDir { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
 
+@onready var _sprite: Sprite2D = $Sprite2D
+
 var health: float
 var ink: InkSystem
 var cleaner: CleanerSystem
@@ -51,7 +53,6 @@ var _dash_trail: bool = false
 var _arena: Arena
 var _dash_splat: WeaponData
 
-var _sprite: Sprite2D
 var _facing: FacingDir = FacingDir.BOTTOM_RIGHT
 var _has_sprites: bool = false
 
@@ -114,11 +115,11 @@ func _setup_sprite() -> void:
 	_has_sprites = sprite_top_left != null and sprite_top_right != null \
 		and sprite_bottom_left != null and sprite_bottom_right != null
 	if not _has_sprites:
+		_sprite.visible = false
 		return
-	_sprite = Sprite2D.new()
+	_sprite.visible = true
 	_sprite.texture = sprite_bottom_right
 	_sprite.scale = Vector2.ONE * _sprite_base_scale() * sprite_scale_mult
-	add_child(_sprite)
 
 
 func _sprite_base_scale() -> float:

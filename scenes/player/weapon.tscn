@@ -12,3 +12,5 @@ sprite_top_left = ExtResource("2_u87s8")
 sprite_top_right = ExtResource("3_5ijpr")
 sprite_bottom_left = ExtResource("4_e1rds")
 sprite_bottom_right = ExtResource("5_1kp0g")
+
+[node name="Sprite2D" type="Sprite2D" parent="." unique_id=1061917590]
