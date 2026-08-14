@@ -5,7 +5,7 @@
 
 [sub_resource type="Resource" id="Resource_upm75"]
 script = ExtResource("1_htv5b")
-stat = 17
+stat = 19
 add = 20.0
 
 [resource]

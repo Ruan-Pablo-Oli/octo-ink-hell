@@ -17,6 +17,9 @@ const ALL := [
 	preload("res://resources/upgrades/diluted_ink.tres"),
 	preload("res://resources/upgrades/rotating_shield.tres"),
 	preload("res://resources/upgrades/dash_invincibility.tres"),
+	preload("res://resources/upgrades/max_health.tres"),
+	preload("res://resources/upgrades/health_regen.tres"),
+	preload("res://resources/upgrades/extra_fluid.tres")
 ]
 
 

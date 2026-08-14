@@ -5,7 +5,7 @@
 
 [sub_resource type="Resource" id="Resource_gnhh6"]
 script = ExtResource("1_7t3v1")
-stat = 9
+stat = 11
 mult = 1.5
 
 [resource]

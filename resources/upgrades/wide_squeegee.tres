@@ -5,7 +5,7 @@
 
 [sub_resource type="Resource" id="Resource_yx3a4"]
 script = ExtResource("1_77tub")
-stat = 11
+stat = 13
 mult = 1.4
 
 [resource]
