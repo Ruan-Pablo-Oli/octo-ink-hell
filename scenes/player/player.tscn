@@ -5,8 +5,6 @@
 [ext_resource type="Texture2D" uid="uid://ciojtj7rve7gl" path="res://assets/sprites/player/polvo_sprite_facing_top_right.png" id="3_75vfm"]
 [ext_resource type="Texture2D" uid="uid://d351cyw2ylmo8" path="res://assets/sprites/player/polvo_sprite_facing_left.png" id="4_0owmy"]
 [ext_resource type="Texture2D" uid="uid://dlp1kqfdb0e5n" path="res://assets/sprites/player/polvo_sprite_facing_right.png" id="5_qek5x"]
-[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="6_qek5x"]
-[ext_resource type="Resource" uid="uid://cs4xhc0dyytkq" path="res://resources/upgrades/dash_invincibility.tres" id="7_5gtgg"]
 [ext_resource type="Shader" uid="uid://str1e1k6twta" path="res://scenes/player/player.gdshader" id="8_qek5x"]
 
 [sub_resource type="ShaderMaterial" id="ShaderMaterial_pcus6"]
@@ -20,7 +18,6 @@ sprite_top_left = ExtResource("2_p47bc")
 sprite_top_right = ExtResource("3_75vfm")
 sprite_bottom_left = ExtResource("4_0owmy")
 sprite_bottom_right = ExtResource("5_qek5x")
-debug_forced_upgrades = Array[ExtResource("6_qek5x")]([ExtResource("7_5gtgg")])
 
 [node name="Sprite2D" type="Sprite2D" parent="." unique_id=702554687]
 material = SubResource("ShaderMaterial_pcus6")

@@ -4,7 +4,7 @@ var _t: float = 0.0
 
 
 func _ready() -> void:
-	collision_layer = 8
+	collision_layer = 16
 	collision_mask = 1
 	monitoring = true
 	var col := CollisionShape2D.new()
