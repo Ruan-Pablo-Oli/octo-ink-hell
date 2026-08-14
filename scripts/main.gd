@@ -6,9 +6,16 @@ const InkOverlayScript := preload("res://scripts/systems/ink_overlay.gd")
 const WaveManagerScript := preload("res://scripts/systems/wave_manager.gd")
 const UpgradeScreenScene := preload("res://scenes/ui/upgrade_screen.tscn")
 const PauseMenuScript := preload("res://scripts/systems/pause_menu.gd")
+const MusicPlayerScript := preload("res://scripts/systems/music_player.gd")
+const MainTrack := preload("res://assets/audio/Neon Pixel Run.mp3")
 
 func _ready() -> void:
-	
+	var music := AudioStreamPlayer.new()
+	music.name = "MusicPlayer"
+	music.set_script(MusicPlayerScript)
+	music.track = MainTrack
+	add_child(music)
+
 	add_child(ArenaScene.instantiate())
 	var entities := Node2D.new()
 	entities.name = "Entities"

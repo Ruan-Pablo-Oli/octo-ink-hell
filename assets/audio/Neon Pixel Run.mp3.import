@@ -1,0 +1,19 @@
+[remap]
+
+importer="mp3"
+type="AudioStreamMP3"
+uid="uid://cily787vh27vt"
+path="res://.godot/imported/Neon Pixel Run.mp3-4775e0be19bf2697e028a098f5cb1aae.mp3str"
+
+[deps]
+
+source_file="res://assets/audio/Neon Pixel Run.mp3"
+dest_files=["res://.godot/imported/Neon Pixel Run.mp3-4775e0be19bf2697e028a098f5cb1aae.mp3str"]
+
+[params]
+
+loop=false
+loop_offset=0
+bpm=0
+beat_count=0
+bar_beats=4
