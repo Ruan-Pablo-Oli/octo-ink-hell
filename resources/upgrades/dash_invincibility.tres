@@ -12,6 +12,6 @@ add = 1.0
 script = ExtResource("2_6js56")
 display_name = "Troca de pele"
 description = "Ganha invencibilidade durante o dash"
-category = 1
+category = 3
 effects = Array[ExtResource("1_tewjn")]([SubResource("Resource_upm75")])
 max_stacks = 2

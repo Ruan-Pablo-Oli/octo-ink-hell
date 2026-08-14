@@ -1,6 +1,7 @@
 extends RefCounted
 class_name UpgradePool
 
+
 const ALL := [
 	preload("res://resources/upgrades/dense_ink.tres"),
 	preload("res://resources/upgrades/triple_jet.tres"),
@@ -19,36 +20,63 @@ const ALL := [
 ]
 
 
-static func roll(system: UpgradeSystem, count: int = 3) -> Array:
-	var available: Array = []
-	for up in ALL:
-		if system == null or not system.is_maxed(up):
-			available.append(up)
-	if available.is_empty():
-		return []
-
-	var by_category: Dictionary = {}
-	for up in available:
-		if not by_category.has(up.category):
-			by_category[up.category] = []
-		by_category[up.category].append(up)
+static func roll(system: UpgradeSystem, count: int = 4) -> Array:
+	var categories: Array[int] = [
+		UpgradeData.Category.OFFENSIVE,
+		UpgradeData.Category.MOBILITY,
+		UpgradeData.Category.UTILITY,
+		UpgradeData.Category.SURVIVABILITY
+	]
 
 	var picked: Array = []
-	var categories: Array = by_category.keys()
+
+	# Embaralha a ordem das categorias
 	categories.shuffle()
-	for cat in categories:
+
+	for category: int in categories:
 		if picked.size() >= count:
 			break
-		var bucket: Array = by_category[cat]
-		picked.append(bucket[randi() % bucket.size()])
 
+		var available: Array = []
+
+		for upgrade: UpgradeData in ALL:
+			if upgrade.category != category:
+				continue
+
+			if system != null and system.is_maxed(upgrade):
+				continue
+
+			available.append(upgrade)
+
+		# Não existe upgrade disponível nessa categoria
+		if available.is_empty():
+			continue
+
+		var selected: UpgradeData = available[randi() % available.size()]
+		picked.append(selected)
+
+	# Caso alguma categoria esteja sem upgrades disponíveis,
+	# completa as vagas com qualquer upgrade disponível.
 	if picked.size() < count:
-		var rest: Array = available.filter(func(u: UpgradeData) -> bool: return u not in picked)
-		rest.shuffle()
-		for up in rest:
+		var remaining: Array = []
+
+		for upgrade: UpgradeData in ALL:
+			if system != null and system.is_maxed(upgrade):
+				continue
+
+			if upgrade in picked:
+				continue
+
+			remaining.append(upgrade)
+
+		remaining.shuffle()
+
+		for upgrade: UpgradeData in remaining:
 			if picked.size() >= count:
 				break
-			picked.append(up)
+
+			picked.append(upgrade)
 
 	picked.shuffle()
+
 	return picked

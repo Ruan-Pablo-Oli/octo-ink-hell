@@ -9,6 +9,7 @@ var _panel: PanelContainer
 var _is_paused: bool = false
 var _music_bus_idx: int = -1
 
+
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 100
@@ -151,3 +152,4 @@ func _on_resume_pressed() -> void:
 	set_paused(false)
 func _on_quit_pressed() -> void:
 	get_tree().paused = false
+	get_tree().change_scene_to_file("res://scenes/ui/start_menu.tscn")

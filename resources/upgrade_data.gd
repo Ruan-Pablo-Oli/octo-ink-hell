@@ -1,7 +1,12 @@
 extends Resource
 class_name UpgradeData
 
-enum Category { OFFENSIVE, MOBILITY, UTILITY }
+enum Category {
+	OFFENSIVE,
+	MOBILITY,
+	UTILITY,
+	SURVIVABILITY
+}
 
 @export var display_name: String = "Melhoria"
 @export_multiline var description: String = ""
@@ -16,15 +21,26 @@ static func category_name(cat: Category) -> String:
 			return "OFENSIVA"
 		Category.MOBILITY:
 			return "MOBILIDADE"
-		_:
+		Category.UTILITY:
 			return "UTILIDADE"
+		Category.SURVIVABILITY:
+			return "SOBREVIVÊNCIA"
+
+	return "UTILIDADE"
 
 
 static func category_color(cat: Category) -> Color:
 	match cat:
 		Category.OFFENSIVE:
 			return Color(0.95, 0.45, 0.35)
+
 		Category.MOBILITY:
 			return Color(0.45, 0.75, 0.98)
-		_:
+
+		Category.UTILITY:
 			return Color(0.35, 0.92, 0.78)
+
+		Category.SURVIVABILITY:
+			return Color(0.98, 0.78, 0.35)
+
+	return Color.WHITE

@@ -12,6 +12,6 @@ add = 1.0
 script = ExtResource("2_rw8ti")
 display_name = "Membrana"
 description = "Escudo rotacional que protege de projeties"
-category = 2
+category = 3
 effects = Array[ExtResource("1_ehadk")]([SubResource("Resource_upm75")])
 max_stacks = 2

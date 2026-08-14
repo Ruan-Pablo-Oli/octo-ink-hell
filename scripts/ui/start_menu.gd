@@ -9,13 +9,33 @@ class_name MainMenu
 const ACCENT_COLOR := Color(0.55, 0.35, 0.85)
 const ACCENT_BRIGHT := Color(0.70, 0.48, 1.0)
 
-const BACKGROUND_COLOR := Color(0.025, 0.02, 0.045, 1.0)
-const PANEL_BG := Color(0.08, 0.065, 0.11, 0.96)
+const PANEL_BG := Color(0.08, 0.065, 0.11, 0.94)
 
 const TEXT_COLOR := Color(0.95, 0.92, 1.0)
 const SUBTEXT_COLOR := Color(0.65, 0.62, 0.72)
 
 const DANGER_COLOR := Color(0.55, 0.20, 0.25)
+
+# ============================================================
+# IMAGE SETTINGS
+# ============================================================
+
+@export_category("Menu Images")
+
+@export var background_scale: Vector2 = Vector2.ONE
+@export var logo_scale: Vector2 = Vector2.ONE
+
+# ============================================================
+# IMAGES
+# ============================================================
+
+const BACKGROUND_TEXTURE := preload(
+	"res://assets/ui/menu_background.jpg"
+)
+
+const LOGO_TEXTURE := preload(
+	"res://assets/ui/menu_logo.png"
+)
 
 
 # ============================================================
@@ -30,45 +50,54 @@ const DANGER_COLOR := Color(0.55, 0.20, 0.25)
 # REFERENCES
 # ============================================================
 
+var _background: TextureRect
+var _logo: TextureRect
+var _panel: PanelContainer
+
 var _play_button: Button
+var _options_button: Button
 var _quit_button: Button
 
-var _panel: PanelContainer
-var _background: ColorRect
 
-var _animation_time := 0.0
+# ============================================================
+# LOGO ANIMATION
+# ============================================================
+
+var _logo_time: float = 0.0
+
+const LOGO_FLOAT_HEIGHT := 8.0
+const LOGO_FLOAT_SPEED := 1.5
+const LOGO_ROTATION_AMOUNT := 1.5
 
 
-
-
-func _center_menu() -> void:
-	if _panel == null:
-		return
-
-	var viewport_size := get_viewport_rect().size
-	var panel_size := _panel.size
-
-	_panel.position = (
-		viewport_size - panel_size
-	) * 0.5
 # ============================================================
 # READY
 # ============================================================
 
 func _ready() -> void:
+
+	size = get_viewport_rect().size
+	position = Vector2.ZERO
+
 	_build_background()
+	_build_logo()
 	_build_menu()
 
-	_center_menu()
-
-	get_viewport().size_changed.connect(_center_menu)
+	get_viewport().size_changed.connect(
+		_on_viewport_resized
+	)
 
 	_play_button.grab_focus()
+
+	# --------------------------------------------------------
+	# MENU ENTRANCE
+	# --------------------------------------------------------
 
 	_panel.modulate.a = 0.0
 	_panel.scale = Vector2(0.92, 0.92)
 
 	var tween := create_tween()
+
 	tween.set_parallel(true)
 
 	tween.tween_property(
@@ -76,83 +105,163 @@ func _ready() -> void:
 		"modulate:a",
 		1.0,
 		0.4
-	).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	).set_trans(
+		Tween.TRANS_QUAD
+	).set_ease(
+		Tween.EASE_OUT
+	)
 
 	tween.tween_property(
 		_panel,
 		"scale",
 		Vector2.ONE,
 		0.45
-	).set_trans(Tween.TRANS_BACK).set_ease(Tween.EASE_OUT)
+	).set_trans(
+		Tween.TRANS_BACK
+	).set_ease(
+		Tween.EASE_OUT
+	)
+
+
+# ============================================================
+# PROCESS
+# ============================================================
+
+func _process(delta: float) -> void:
+
+	_logo_time += delta
+
+	if _logo == null:
+		return
+
+	# Movimento vertical suave
+	var float_offset := sin(
+		_logo_time * LOGO_FLOAT_SPEED
+	) * LOGO_FLOAT_HEIGHT
+
+	# Pequena inclinação
+	var rotation_offset := sin(
+		_logo_time * LOGO_FLOAT_SPEED * 0.75
+	) * deg_to_rad(LOGO_ROTATION_AMOUNT)
+
+	_logo.position.y = float_offset
+
+	_logo.rotation = rotation_offset
+
 
 # ============================================================
 # BACKGROUND
 # ============================================================
 
 func _build_background() -> void:
-	_background = ColorRect.new()
+
+	_background = TextureRect.new()
+
 	_background.name = "Background"
 
-	_background.color = BACKGROUND_COLOR
+	_background.texture = BACKGROUND_TEXTURE
 
-	_background.set_anchors_and_offsets_preset(
-		Control.PRESET_FULL_RECT
+	_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+
+	_background.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_COVERED
+
+	_background.position = Vector2.ZERO
+
+	_background.size = get_viewport_rect().size
+
+	_background.scale = background_scale
+
+	_background.pivot_offset = Vector2(
+		_background.size.x / 2.0,
+		_background.size.y / 2.0
 	)
 
 	_background.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
 	add_child(_background)
 
-	# Grid decorativo
-	var grid := GridBackground.new()
-	grid.name = "GridBackground"
 
-	grid.set_anchors_and_offsets_preset(
-		Control.PRESET_FULL_RECT
+	# --------------------------------------------------------
+	# DARK OVERLAY
+	# --------------------------------------------------------
+
+	var overlay := ColorRect.new()
+
+	overlay.name = "DarkOverlay"
+
+	overlay.color = Color(
+		0.02,
+		0.015,
+		0.04,
+		0.42
 	)
 
-	grid.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	overlay.position = Vector2.ZERO
+	overlay.size = get_viewport_rect().size
 
-	add_child(grid)
+	overlay.mouse_filter = Control.MOUSE_FILTER_IGNORE
 
+	add_child(overlay)
+
+# ============================================================
+# LOGO
+# ============================================================
+
+func _build_logo() -> void:
+
+	_logo = TextureRect.new()
+
+	_logo.name = "Logo"
+
+	_logo.texture = LOGO_TEXTURE
+
+	_logo.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
+
+	_logo.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT_CENTERED
+
+	_logo.custom_minimum_size = Vector2(
+		520,
+		220
+	)
+
+	_logo.size = Vector2(
+		520,
+		220
+	)
+
+	_logo.scale = logo_scale
+
+	_logo.pivot_offset = Vector2(
+		260,
+		20
+	)
+
+	_logo.position = Vector2(
+		(get_viewport_rect().size.x - 520.0) / 2.0,
+		70
+	)
+
+	_logo.mouse_filter = Control.MOUSE_FILTER_IGNORE
+
+	add_child(_logo)
 
 # ============================================================
 # MENU
 # ============================================================
 
 func _build_menu() -> void:
-	# ========================================================
-	# CENTER CONTAINER
-	# ========================================================
-
-	var center := CenterContainer.new()
-	center.name = "CenterContainer"
-
-	center.position = Vector2.ZERO
-	center.size = get_viewport_rect().size
-
-	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
-
-	add_child(center)
-
-
-	# Atualiza o tamanho caso a janela seja redimensionada
-	get_viewport().size_changed.connect(
-		func() -> void:
-			center.size = get_viewport_rect().size
-	)
-
 
 	# ========================================================
 	# PANEL
 	# ========================================================
 
 	_panel = PanelContainer.new()
+
 	_panel.name = "MenuPanel"
 
 	_panel.custom_minimum_size = Vector2(
 		380,
-		520
+		330
 	)
 
 	var panel_style := StyleBoxFlat.new()
@@ -162,9 +271,10 @@ func _build_menu() -> void:
 	panel_style.set_corner_radius_all(20)
 
 	panel_style.set_border_width_all(2)
+
 	panel_style.border_color = ACCENT_COLOR
 
-	panel_style.set_content_margin_all(32)
+	panel_style.set_content_margin_all(28)
 
 	panel_style.shadow_color = Color(
 		0.0,
@@ -180,7 +290,14 @@ func _build_menu() -> void:
 		panel_style
 	)
 
-	center.add_child(_panel)
+	add_child(_panel)
+
+
+	# ========================================================
+	# PANEL POSITION
+	# ========================================================
+
+	_center_panel()
 
 
 	# ========================================================
@@ -196,71 +313,18 @@ func _build_menu() -> void:
 		14
 	)
 
-	vbox.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
 	_panel.add_child(vbox)
 
 
 	# ========================================================
-	# TITLE
-	# ========================================================
-
-	var title := Label.new()
-
-	title.name = "Title"
-
-	title.text = "Octo Ink Hell"
-
-	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	title.size_flags_horizontal = Control.SIZE_EXPAND_FILL
-
-	title.add_theme_font_size_override(
-		"font_size",
-		42
-	)
-
-	title.add_theme_color_override(
-		"font_color",
-		TEXT_COLOR
-	)
-
-	vbox.add_child(title)
-
-
-	# ========================================================
-	# TITLE ACCENT
-	# ========================================================
-
-	var accent := ColorRect.new()
-
-	accent.name = "TitleAccent"
-
-	accent.color = ACCENT_COLOR
-
-	accent.custom_minimum_size = Vector2(
-		120,
-		3
-	)
-
-	accent.size_flags_horizontal = Control.SIZE_SHRINK_CENTER
-
-	vbox.add_child(accent)
-
-
-	# ========================================================
-	# SUBTITLE
+	# SMALL SUBTITLE
 	# ========================================================
 
 	var subtitle := Label.new()
 
-	subtitle.name = "Subtitle"
-
 	subtitle.text = "SURVIVE THE WAVES"
 
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	subtitle.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	subtitle.add_theme_font_size_override(
 		"font_size",
@@ -281,26 +345,22 @@ func _build_menu() -> void:
 
 	var spacer := Control.new()
 
-	spacer.name = "Spacer"
-
 	spacer.custom_minimum_size = Vector2(
 		0,
-		30
+		12
 	)
 
 	vbox.add_child(spacer)
 
 
 	# ========================================================
-	# PLAY BUTTON
+	# PLAY
 	# ========================================================
 
 	_play_button = _make_button(
 		"JOGAR",
 		ACCENT_COLOR
 	)
-
-	_play_button.name = "PlayButton"
 
 	_play_button.pressed.connect(
 		_on_play_pressed
@@ -309,18 +369,14 @@ func _build_menu() -> void:
 	vbox.add_child(_play_button)
 
 
-
-
 	# ========================================================
-	# QUIT BUTTON
+	# QUIT
 	# ========================================================
 
 	_quit_button = _make_button(
 		"SAIR",
 		DANGER_COLOR
 	)
-
-	_quit_button.name = "QuitButton"
 
 	_quit_button.pressed.connect(
 		_on_quit_pressed
@@ -330,34 +386,14 @@ func _build_menu() -> void:
 
 
 	# ========================================================
-	# BOTTOM SPACER
-	# ========================================================
-
-	var bottom_spacer := Control.new()
-
-	bottom_spacer.name = "BottomSpacer"
-
-	bottom_spacer.custom_minimum_size = Vector2(
-		0,
-		20
-	)
-
-	vbox.add_child(bottom_spacer)
-
-
-	# ========================================================
 	# VERSION
 	# ========================================================
 
 	var version := Label.new()
 
-	version.name = "Version"
-
 	version.text = game_version
 
 	version.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
-
-	version.size_flags_horizontal = Control.SIZE_EXPAND_FILL
 
 	version.add_theme_font_size_override(
 		"font_size",
@@ -370,6 +406,26 @@ func _build_menu() -> void:
 	)
 
 	vbox.add_child(version)
+
+
+# ============================================================
+# CENTER PANEL
+# ============================================================
+
+func _center_panel() -> void:
+
+	if _panel == null:
+		return
+
+	var viewport_size := get_viewport_rect().size
+
+	var panel_size := _panel.size
+
+	_panel.position = Vector2(
+		(viewport_size.x - panel_size.x) / 2.0,
+		viewport_size.y - panel_size.y - 70.0
+	)
+
 
 # ============================================================
 # BUTTON
@@ -489,12 +545,33 @@ func _make_button(
 
 
 # ============================================================
-# BUTTON ACTIONS
+# VIEWPORT
+# ============================================================
+
+func _on_viewport_resized() -> void:
+
+	var viewport_size := get_viewport_rect().size
+
+	_background.size = viewport_size
+
+	_background.position = Vector2.ZERO
+
+	_center_panel()
+
+	# Mantém a logo centralizada horizontalmente
+	_logo.position.x = (
+		viewport_size.x - _logo.size.x
+	) / 2.0
+
+
+# ============================================================
+# ACTIONS
 # ============================================================
 
 func _on_play_pressed() -> void:
 
 	if game_scene.is_empty():
+
 		push_error(
 			"Game scene is not configured."
 		)
@@ -502,6 +579,7 @@ func _on_play_pressed() -> void:
 		return
 
 	if not ResourceLoader.exists(game_scene):
+
 		push_error(
 			"Game scene does not exist: "
 			+ game_scene
@@ -532,55 +610,9 @@ func _unhandled_input(
 
 	if event.is_action_pressed("ui_accept"):
 
-		if _play_button.has_focus():
+		if _play_button != null \
+		and _play_button.has_focus():
+
 			_on_play_pressed()
 
 		get_viewport().set_input_as_handled()
-
-
-# ============================================================
-# GRID BACKGROUND
-# ============================================================
-
-class GridBackground extends Control:
-
-	var grid_size := 80.0
-
-	func _draw() -> void:
-
-		var viewport_size := size
-
-		var color := Color(
-			0.16,
-			0.10,
-			0.22,
-			0.18
-		)
-
-		for x in range(
-			0,
-			int(viewport_size.x / grid_size) + 1
-		):
-
-			var px := x * grid_size
-
-			draw_line(
-				Vector2(px, 0),
-				Vector2(px, viewport_size.y),
-				color,
-				1.0
-			)
-
-		for y in range(
-			0,
-			int(viewport_size.y / grid_size) + 1
-		):
-
-			var py := y * grid_size
-
-			draw_line(
-				Vector2(0, py),
-				Vector2(viewport_size.x, py),
-				color,
-				1.0
-			)

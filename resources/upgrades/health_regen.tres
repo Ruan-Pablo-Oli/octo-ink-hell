@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://b88hybahn63d8"]
+
+[ext_resource type="Script" uid="uid://dvxlmkgi7nds3" path="res://resources/upgrade_effect.gd" id="1_380sa"]
+[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="2_t0778"]
+
+[sub_resource type="Resource" id="Resource_upm75"]
+script = ExtResource("1_380sa")
+stat = 18
+add = 1.0
+
+[resource]
+script = ExtResource("2_t0778")
+display_name = "Novo Coração"
+description = "Aumenta a regeneração de vida"
+category = 3
+effects = Array[ExtResource("1_380sa")]([SubResource("Resource_upm75")])
+max_stacks = 2

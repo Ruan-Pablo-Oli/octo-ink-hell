@@ -9,6 +9,8 @@ enum Stat {
 	INK_COST,
 	INK_MAX,
 	INK_REGEN,
+	CLEANER_MAX,
+	CLEANER_REGEN,
 	MOVE_SPEED,
 	DASH_COOLDOWN,
 	DASH_DISTANCE,
@@ -19,6 +21,9 @@ enum Stat {
 	SPLAT_DIRTINESS,
 	SHIELD,
 	DASH_INVINCIBLE,
+	HEALTH,
+	HEALTH_REGEN,
+	
 }
 
 @export var stat: Stat = Stat.DAMAGE

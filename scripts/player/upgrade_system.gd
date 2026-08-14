@@ -15,21 +15,43 @@ func _ready() -> void:
 func _on_upgrade_selected(upgrade: UpgradeData) -> void:
 	if upgrade == null:
 		return
+
 	add_upgrade(upgrade)
 
 
-func add_upgrade(upgrade: UpgradeData) -> void:
+func add_upgrade(upgrade: UpgradeData) -> bool:
+	if upgrade == null:
+		return false
+
+	if is_maxed(upgrade):
+		return false
+
 	_stacks[upgrade] = stacks_of(upgrade) + 1
-	for e in upgrade.effects:
-		if e == null:
+
+	for effect in upgrade.effects:
+		if effect == null:
 			continue
-		_add[e.stat] = float(_add.get(e.stat, 0.0)) + e.add
-		_mult[e.stat] = float(_mult.get(e.stat, 1.0)) * e.mult
+
+		_add[effect.stat] = (
+			float(_add.get(effect.stat, 0.0))
+			+ effect.add
+		)
+
+		_mult[effect.stat] = (
+			float(_mult.get(effect.stat, 1.0))
+			* effect.mult
+		)
+
 	GameEvents.upgrades_changed.emit()
+
+	return true
 
 
 func value(stat: Stat, base: float) -> float:
-	return (base + float(_add.get(stat, 0.0))) * float(_mult.get(stat, 1.0))
+	var additive := float(_add.get(stat, 0.0))
+	var multiplier := float(_mult.get(stat, 1.0))
+
+	return (base + additive) * multiplier
 
 
 func has_flag(stat: Stat) -> bool:
@@ -37,22 +59,44 @@ func has_flag(stat: Stat) -> bool:
 
 
 func stacks_of(upgrade: UpgradeData) -> int:
+	if upgrade == null:
+		return 0
+
 	return int(_stacks.get(upgrade, 0))
 
 
 func is_maxed(upgrade: UpgradeData) -> bool:
-	return upgrade.max_stacks > 0 and stacks_of(upgrade) >= upgrade.max_stacks
+	if upgrade == null:
+		return true
+
+	if upgrade.max_stacks <= 0:
+		return false
+
+	return stacks_of(upgrade) >= upgrade.max_stacks
 
 
 func acquired() -> Array:
 	var out: Array = []
-	for up in _stacks:
-		out.append({"upgrade": up, "stacks": _stacks[up]})
+
+	for upgrade in _stacks:
+		out.append({
+			"upgrade": upgrade,
+			"stacks": _stacks[upgrade]
+		})
+
 	return out
 
 
 static func find(from: Node) -> UpgradeSystem:
-	var p := from.get_tree().get_first_node_in_group("player")
-	if p == null or not is_instance_valid(p):
+	var player := from.get_tree().get_first_node_in_group("player")
+
+	if player == null:
 		return null
-	return p.upgrades if "upgrades" in p else null
+
+	if not is_instance_valid(player):
+		return null
+
+	if "upgrades" in player:
+		return player.upgrades
+
+	return null

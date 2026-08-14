@@ -8,3 +8,4 @@ anchors_preset = 0
 offset_right = 40.0
 offset_bottom = 40.0
 script = ExtResource("1_1yohx")
+logo_scale = Vector2(1.2, 1.2)

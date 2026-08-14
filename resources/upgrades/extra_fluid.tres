@@ -1,0 +1,16 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://de3qsmy527jda"]
+
+[ext_resource type="Script" uid="uid://dvxlmkgi7nds3" path="res://resources/upgrade_effect.gd" id="1_agsqf"]
+[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="2_h5pnt"]
+
+[sub_resource type="Resource" id="Resource_hjpkm"]
+script = ExtResource("1_agsqf")
+stat = 7
+add = 30.0
+
+[resource]
+script = ExtResource("2_h5pnt")
+display_name = "Fluido Extra"
+description = "+30 de fluido de limpeza máximo"
+category = 2
+effects = Array[ExtResource("1_agsqf")]([SubResource("Resource_hjpkm")])
