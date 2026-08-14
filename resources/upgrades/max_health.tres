@@ -10,8 +10,8 @@ add = 20.0
 
 [resource]
 script = ExtResource("2_g5kly")
-display_name = "Pele Grossa"
-description = "Aumenta a vida "
+display_name = "Pele Abissal"
+description = "Aumenta a vida maxima em +20"
 category = 3
 effects = Array[ExtResource("1_htv5b")]([SubResource("Resource_upm75")])
 max_stacks = 2
