@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://cs4xhc0dyytkq"]
+
+[ext_resource type="Script" uid="uid://dvxlmkgi7nds3" path="res://resources/upgrade_effect.gd" id="1_tewjn"]
+[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="2_6js56"]
+
+[sub_resource type="Resource" id="Resource_upm75"]
+script = ExtResource("1_tewjn")
+stat = 16
+add = 1.0
+
+[resource]
+script = ExtResource("2_6js56")
+display_name = "Troca de pele"
+description = "Ganha invencibilidade durante o dash"
+category = 1
+effects = Array[ExtResource("1_tewjn")]([SubResource("Resource_upm75")])
+max_stacks = 2

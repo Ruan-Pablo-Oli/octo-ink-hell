@@ -1,0 +1,9 @@
+[gd_scene format=3 uid="uid://d2dhqqymdpx8n"]
+
+[ext_resource type="Script" uid="uid://d4a1oqx6ayr6y" path="res://scripts/player/upgrades/shield_arc.gd" id="1_48j0v"]
+
+[node name="Node2D" type="Node2D" unique_id=115419272]
+script = ExtResource("1_48j0v")
+
+[node name="Area2D" type="Area2D" parent="." unique_id=310601765]
+script = ExtResource("1_48j0v")

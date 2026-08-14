@@ -17,6 +17,8 @@ enum Stat {
 	WIPE_COST,
 	SPLAT_SIZE,
 	SPLAT_DIRTINESS,
+	SHIELD,
+	DASH_INVINCIBLE,
 }
 
 @export var stat: Stat = Stat.DAMAGE

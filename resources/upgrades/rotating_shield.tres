@@ -1,0 +1,17 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://45pkwa0ygx32"]
+
+[ext_resource type="Script" uid="uid://dvxlmkgi7nds3" path="res://resources/upgrade_effect.gd" id="1_ehadk"]
+[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="2_rw8ti"]
+
+[sub_resource type="Resource" id="Resource_upm75"]
+script = ExtResource("1_ehadk")
+stat = 15
+add = 1.0
+
+[resource]
+script = ExtResource("2_rw8ti")
+display_name = "Membrana"
+description = "Escudo rotacional que protege de projeties"
+category = 2
+effects = Array[ExtResource("1_ehadk")]([SubResource("Resource_upm75")])
+max_stacks = 2
