@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://boerobo1nqlr8"]
+
+[ext_resource type="Script" uid="uid://chw6o15hydrfm" path="res://scripts/ui/end_game.gd" id="1_fnkk4"]
+
+[node name="EndGameLayer" type="CanvasLayer" unique_id=1901073286]
+script = ExtResource("1_fnkk4")

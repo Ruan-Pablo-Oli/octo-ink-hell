@@ -1156,6 +1156,25 @@ func _damage_flash() -> void:
 	)
 
 
+func _set_damage_shader(active: bool) -> void:
+
+	if not _has_sprites:
+		return
+
+	var material := _sprite.material as ShaderMaterial
+
+	if material == null:
+		return
+
+	if _damage_flash_tween and _damage_flash_tween.is_valid():
+		_damage_flash_tween.kill()
+		_damage_flash_tween = null
+
+	material.set_shader_parameter(
+		"damage_strength",
+		1.0 if active else 0.0
+	)
+	
 func take_damage(amount: float) -> void:
 
 	if not _alive:
@@ -1217,30 +1236,16 @@ func _die() -> void:
 
 	velocity = Vector2.ZERO
 
-
 	# Disable dash shader
 	_set_dash_shader(false)
+	
+	# Disable damage shader
+	_set_damage_shader(false)
 
+	Input.mouse_mode = Input.MOUSE_MODE_VISIBLE
 
-	Input.mouse_mode = (
-		Input.MOUSE_MODE_VISIBLE
-	)
-
-
+	# Notify the Game Over screen
 	GameEvents.player_died.emit()
-
-
-	var t := get_tree().create_timer(
-		1.6
-	)
-
-
-	t.timeout.connect(
-		func() -> void:
-			get_tree().reload_current_scene()
-	)
-
-
 # =========================================================
 # DRAW
 # =========================================================

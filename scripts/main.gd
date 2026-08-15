@@ -5,18 +5,11 @@ const HudScene := preload("res://scenes/ui/hud.tscn")
 const InkOverlayScript := preload("res://scripts/systems/ink_overlay.gd")
 const WaveManagerScript := preload("res://scripts/systems/wave_manager.gd")
 const UpgradeScreenScene := preload("res://scenes/ui/upgrade_screen.tscn")
-const PauseMenuScript := preload("res://scripts/systems/pause_menu.gd")
-const MusicPlayerScript := preload("res://scripts/systems/music_player.gd")
-const MainTrack := preload("res://assets/audio/Neon Pixel Run.mp3")
+const PauseMenuScript := preload("res://scripts/ui/pause_menu.gd")
+const GameOverScene := preload("res://scenes/ui/end_game.tscn")
 const EnemyIndicatorsScript := preload("res://scripts/systems/enemy_indicator.gd")
 
 func _ready() -> void:
-	var music := AudioStreamPlayer.new()
-	music.name = "MusicPlayer"
-	music.set_script(MusicPlayerScript)
-	music.track = MainTrack
-	add_child(music)
-
 	var indicators := CanvasLayer.new()
 	indicators.name = "EnemyIndicators"
 	# Importante:
@@ -32,7 +25,6 @@ func _ready() -> void:
 	indicators.add_child(
 		indicator_canvas
 	)
-	
 	
 	add_child(ArenaScene.instantiate())
 	var entities := Node2D.new()
@@ -52,6 +44,9 @@ func _ready() -> void:
 	waves.name = "WaveManager"
 	waves.set_script(WaveManagerScript)
 	add_child(waves)
+	
+	add_child(GameOverScene.instantiate())
+		
 	var pause_menu := CanvasLayer.new()
 	pause_menu.name = "PauseMenu"
 	pause_menu.set_script(PauseMenuScript)

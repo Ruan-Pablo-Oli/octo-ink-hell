@@ -1,0 +1,8 @@
+[gd_scene format=3 uid="uid://c73wkpe5diw1u"]
+
+[ext_resource type="Script" uid="uid://xbhcq3duekl0" path="res://scripts/systems/music_player.gd" id="1_dwmsv"]
+[ext_resource type="AudioStream" uid="uid://cily787vh27vt" path="res://assets/audio/Neon Pixel Run.mp3" id="2_skv4d"]
+
+[node name="AudioStreamPlayer" type="AudioStreamPlayer" unique_id=1898543796]
+script = ExtResource("1_dwmsv")
+track = ExtResource("2_skv4d")
