@@ -19,6 +19,11 @@ class_name Weapon
 @export var muzzle_point_bottom_left: Vector2 = Vector2.ZERO
 @export var muzzle_point_bottom_right: Vector2 = Vector2.ZERO
 
+@export_group("Screen Dirt")
+## 1.0 = um carregador cheio enche a tela em 100%.
+## 0.5 = precisa de 2 carregadores pra encher. 0.33 = precisa de 3. etc.
+@export var dirtiness_scale: float = 0.25
+
 const ProjectileScene := preload("res://scenes/combat/projectile.tscn")
 
 enum FacingDir { TOP_LEFT, TOP_RIGHT, BOTTOM_LEFT, BOTTOM_RIGHT }
@@ -146,6 +151,11 @@ func try_fire(origin: Vector2, direction: Vector2, ink: InkSystem) -> bool:
 		GameEvents.ink_depleted.emit()
 		return false
 	_cooldown = 1.0 / maxf(0.01, runtime.fire_rate)
+	# base: fracao real de tinta gasta nesse tiro (ink_cost / max_ink).
+	# dirtiness_scale reduz isso, entao precisa de mais de um carregador
+	# pra encher a tela em 100% (0.5 = 2 carregadores, 0.33 = 3, etc).
+	var base_dirtiness := runtime.ink_cost / maxf(0.01, ink.effective_max())
+	runtime.splat_dirtiness = base_dirtiness * dirtiness_scale
 	_spawn(origin, direction)
 	GameEvents.shot_fired.emit(direction, runtime)
 	return true

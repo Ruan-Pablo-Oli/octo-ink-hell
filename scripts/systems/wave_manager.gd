@@ -17,6 +17,11 @@ const SPAWN_MARGIN := 60.0
 @export var spawn_max_dist: float = 720.0
 @export var growth_factor: float = 1.35
 
+@export_group("Limits")
+@export var max_alive_enemies: int = 60  ## teto de inimigos vivos ao mesmo tempo
+@export var view_margin: float = 80.0  ## distancia extra alem da borda da tela pra considerar "fora de vista"
+@export var spawn_retry_interval: float = 0.15  ## espera antes de tentar de novo quando o teto esta cheio
+
 @export_group("Swarmer")
 @export var swarmer_start_count: int = 4
 @export var swarmer_cap: int = 100
@@ -126,6 +131,11 @@ func _process(delta: float) -> void:
 	_spawn_timer -= delta
 
 	if _spawn_timer <= 0.0:
+		if _living_enemies() >= max_alive_enemies:
+			# teto cheio: espera um pouco e tenta de novo, sem consumir _to_spawn
+			_spawn_timer = spawn_retry_interval
+			return
+
 		_spawn_one()
 		_to_spawn -= 1
 		_spawn_timer = spawn_interval
@@ -266,9 +276,34 @@ func _get_current_enemy_counts(configs: Array) -> Dictionary:
 	return result
 
 
+## Retangulo visivel da camera atual, em coordenadas do mundo.
+## Retorna um Rect2 vazio (size ZERO) se nao houver camera ativa.
+func _get_view_rect() -> Rect2:
+	var cam := get_viewport().get_camera_2d()
+
+	if cam == null:
+		return Rect2()
+
+	var vp_size := get_viewport().get_visible_rect().size
+	var half_extents := (vp_size * cam.zoom) / 2.0
+	var center := cam.get_screen_center_position()
+
+	return Rect2(center - half_extents, half_extents * 2.0)
+
+
+## True se pos estiver fora do retangulo de visao (expandido por margin).
+## Se view_rect estiver vazio (sem camera), considera sempre "fora".
+func _is_outside_view(pos: Vector2, view_rect: Rect2, margin: float) -> bool:
+	if view_rect.size == Vector2.ZERO:
+		return true
+
+	return not view_rect.grow(margin).has_point(pos)
+
+
 func _spawn_position() -> Vector2:
 	var arena := Arena.find(self)
 	var origin := _player.global_position
+	var view_rect := _get_view_rect()
 
 	for attempt in 20:
 		var candidate := origin + Vector2.RIGHT.rotated(
@@ -278,7 +313,10 @@ func _spawn_position() -> Vector2:
 			spawn_max_dist
 		)
 
-		if arena == null or arena.contains(candidate, SPAWN_MARGIN):
+		var in_arena := arena == null or arena.contains(candidate, SPAWN_MARGIN)
+		var out_of_view := _is_outside_view(candidate, view_rect, view_margin)
+
+		if in_arena and out_of_view:
 			return candidate
 
 	if arena == null:
@@ -286,15 +324,26 @@ func _spawn_position() -> Vector2:
 			randf() * TAU
 		) * spawn_min_dist
 
-	var best := arena.random_point(SPAWN_MARGIN)
+	# fallback: entre pontos aleatorios da arena, prioriza os que estao
+	# fora de vista; entre esses, o mais distante do player.
+	var best: Vector2 = arena.random_point(SPAWN_MARGIN)
+	var best_out_of_view := _is_outside_view(best, view_rect, view_margin)
 
 	for attempt in 20:
 		var candidate := arena.random_point(SPAWN_MARGIN)
+		var candidate_out_of_view := _is_outside_view(candidate, view_rect, view_margin)
 
-		if candidate.distance_to(origin) > best.distance_to(origin):
+		var should_replace := false
+		if candidate_out_of_view and not best_out_of_view:
+			should_replace = true
+		elif candidate_out_of_view == best_out_of_view:
+			should_replace = candidate.distance_to(origin) > best.distance_to(origin)
+
+		if should_replace:
 			best = candidate
+			best_out_of_view = candidate_out_of_view
 
-		if best.distance_to(origin) >= spawn_min_dist * 0.6:
+		if best_out_of_view and best.distance_to(origin) >= spawn_min_dist * 0.6:
 			break
 
 	return best
