@@ -1,7 +1,7 @@
 extends Node2D
 class_name Arena
 
-@export var size: Vector2 = Vector2(2200.0, 1400.0)
+@export var size: Vector2 = Vector2(3200.0, 2000.0)
 @export var wall_thickness: float = 24.0
 @export var floor_color: Color = Color(0.085, 0.12, 0.18, 1.0)
 @export var wall_color: Color = Color(0.2, 0.46, 0.62, 1.0)

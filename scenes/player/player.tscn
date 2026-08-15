@@ -11,6 +11,8 @@
 shader = ExtResource("8_qek5x")
 shader_parameter/effect_color = Color(0.3, 0.8, 1, 1)
 shader_parameter/effect_strength = 0.0
+shader_parameter/damage_color = Color(1, 0.15, 0.15, 1)
+shader_parameter/damage_strength = 0.0
 
 [node name="Player" type="CharacterBody2D" unique_id=1160876883]
 script = ExtResource("1")

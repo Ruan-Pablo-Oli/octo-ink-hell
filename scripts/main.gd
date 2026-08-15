@@ -8,6 +8,7 @@ const UpgradeScreenScene := preload("res://scenes/ui/upgrade_screen.tscn")
 const PauseMenuScript := preload("res://scripts/systems/pause_menu.gd")
 const MusicPlayerScript := preload("res://scripts/systems/music_player.gd")
 const MainTrack := preload("res://assets/audio/Neon Pixel Run.mp3")
+const EnemyIndicatorsScript := preload("res://scripts/systems/enemy_indicator.gd")
 
 func _ready() -> void:
 	var music := AudioStreamPlayer.new()
@@ -16,6 +17,23 @@ func _ready() -> void:
 	music.track = MainTrack
 	add_child(music)
 
+	var indicators := CanvasLayer.new()
+	indicators.name = "EnemyIndicators"
+	# Importante:
+	# CanvasLayer controla a camada do indicador.
+	indicators.layer = 15
+	add_child(indicators)
+	# Node2D que realmente desenha as setas.
+	var indicator_canvas := Node2D.new()
+	indicator_canvas.name = "IndicatorCanvas"
+	indicator_canvas.set_script(
+		EnemyIndicatorsScript
+	)
+	indicators.add_child(
+		indicator_canvas
+	)
+	
+	
 	add_child(ArenaScene.instantiate())
 	var entities := Node2D.new()
 	entities.name = "Entities"

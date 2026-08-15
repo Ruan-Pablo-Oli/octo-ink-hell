@@ -172,6 +172,7 @@ var _dash_invincible: bool = false
 # EFFECTS
 # =========================================================
 
+var _damage_flash_tween: Tween
 var _trail_timer: float = 0.0
 var _wiggle: float = 0.0
 
@@ -1128,48 +1129,58 @@ func _get_overlay() -> Node:
 # DAMAGE
 # =========================================================
 
+func _damage_flash() -> void:
+	if not _has_sprites:
+		return
+
+	var material := _sprite.material as ShaderMaterial
+
+	if material == null:
+		return
+
+	if _damage_flash_tween and _damage_flash_tween.is_valid():
+		_damage_flash_tween.kill()
+
+	material.set_shader_parameter(
+		"damage_strength",
+		1.0
+	)
+
+	_damage_flash_tween = create_tween()
+
+	_damage_flash_tween.tween_property(
+		material,
+		"shader_parameter/damage_strength",
+		0.0,
+		0.15
+	)
+
+
 func take_damage(amount: float) -> void:
 
 	if not _alive:
 		return
 
-
-	# =====================================================
-	# DASH INVINCIBILITY
-	# =====================================================
-
 	if (
 		_dash_timer > 0.0
 		and _dash_invincible
 	):
-
 		return
-
-
-	# =====================================================
-	# DAMAGE
-	# =====================================================
 
 	health = maxf(
 		0.0,
 		health - amount
 	)
 
+	_damage_flash()
 
 	GameEvents.player_health_changed.emit(
 		health,
 		max_health
 	)
 
-
-	# =====================================================
-	# DEATH
-	# =====================================================
-
 	if health <= 0.0:
-
 		_die()
-
 
 # =========================================================
 # HEAL
