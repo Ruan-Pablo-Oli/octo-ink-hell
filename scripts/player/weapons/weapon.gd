@@ -22,7 +22,7 @@ class_name Weapon
 @export_group("Screen Dirt")
 ## 1.0 = um carregador cheio enche a tela em 100%.
 ## 0.5 = precisa de 2 carregadores pra encher. 0.33 = precisa de 3. etc.
-@export var dirtiness_scale: float = 0.25
+@export var dirtiness_scale: float = 0.10
 
 const ProjectileScene := preload("res://scenes/combat/projectile.tscn")
 

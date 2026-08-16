@@ -9,6 +9,8 @@ const MENU_SCENE := "res://scenes/ui/start_menu.tscn"
 var _dim: ColorRect
 var _panel: PanelContainer
 var _wave_label: Label
+
+var _current_wave: int = 0
 var _visible := false
 
 
@@ -16,12 +18,20 @@ func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
 	layer = 110
 
+	# =========================
+	# DIM BACKGROUND
+	# =========================
+
 	_dim = ColorRect.new()
 	_dim.color = Color(0.0, 0.0, 0.0, 0.65)
 	_dim.set_anchors_preset(Control.PRESET_FULL_RECT)
 	_dim.visible = false
 	_dim.mouse_filter = Control.MOUSE_FILTER_STOP
 	add_child(_dim)
+
+	# =========================
+	# PANEL
+	# =========================
 
 	_panel = PanelContainer.new()
 	_panel.visible = false
@@ -54,11 +64,16 @@ func _ready() -> void:
 
 	add_child(_panel)
 
+	# =========================
+	# CONTENT
+	# =========================
+
 	var vbox := VBoxContainer.new()
 	vbox.add_theme_constant_override("separation", 16)
 	_panel.add_child(vbox)
 
 	# TITLE
+
 	var title := Label.new()
 	title.text = "FIM DE JOGO"
 	title.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -70,6 +85,7 @@ func _ready() -> void:
 	vbox.add_child(title)
 
 	# SUBTITLE
+
 	var subtitle := Label.new()
 	subtitle.text = "Você foi derrotado."
 	subtitle.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
@@ -81,8 +97,9 @@ func _ready() -> void:
 	vbox.add_child(subtitle)
 
 	# WAVE
+
 	_wave_label = Label.new()
-	_wave_label.text = "Onda alcançada: 1"
+	_wave_label.text = "Onda alcançada: 0"
 	_wave_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	_wave_label.add_theme_font_size_override("font_size", 20)
 	_wave_label.add_theme_color_override(
@@ -91,11 +108,16 @@ func _ready() -> void:
 	)
 	vbox.add_child(_wave_label)
 
+	# SPACER
+
 	var spacer := Control.new()
 	spacer.custom_minimum_size = Vector2(0, 8)
 	vbox.add_child(spacer)
 
-	# RESTART
+	# =========================
+	# RESTART BUTTON
+	# =========================
+
 	var restart_btn := _make_button(
 		"Recomeçar",
 		ACCENT_COLOR
@@ -104,7 +126,10 @@ func _ready() -> void:
 	restart_btn.pressed.connect(_on_restart_pressed)
 	vbox.add_child(restart_btn)
 
-	# MENU
+	# =========================
+	# MENU BUTTON
+	# =========================
+
 	var menu_btn := _make_button(
 		"Menu Principal",
 		Color(0.30, 0.25, 0.38)
@@ -113,14 +138,36 @@ func _ready() -> void:
 	menu_btn.pressed.connect(_on_menu_pressed)
 	vbox.add_child(menu_btn)
 
+	# =========================
+	# EVENTS
+	# =========================
+
 	GameEvents.player_died.connect(_show_game_over)
 
+	# Recebe o número da onda atual.
+	GameEvents.wave_started.connect(_on_wave_started)
+
+
+# =========================================================
+# WAVE
+# =========================================================
+
+func _on_wave_started(number: int) -> void:
+	_current_wave = number
+
+
+# =========================================================
+# GAME OVER
+# =========================================================
 
 func _show_game_over() -> void:
 	if _visible:
 		return
 
 	_visible = true
+
+	# Atualiza o texto ANTES de mostrar o painel.
+	_wave_label.text = "Onda alcançada: %d" % _current_wave
 
 	get_tree().paused = true
 
@@ -152,15 +199,27 @@ func _show_game_over() -> void:
 	)
 
 
+# =========================================================
+# RESTART
+# =========================================================
+
 func _on_restart_pressed() -> void:
 	get_tree().paused = false
 	get_tree().reload_current_scene()
 
 
+# =========================================================
+# MENU
+# =========================================================
+
 func _on_menu_pressed() -> void:
 	get_tree().paused = false
 	get_tree().change_scene_to_file(MENU_SCENE)
 
+
+# =========================================================
+# BUTTON
+# =========================================================
 
 func _make_button(
 	text: String,
@@ -177,6 +236,8 @@ func _make_button(
 		18
 	)
 
+	# Normal
+
 	var normal := StyleBoxFlat.new()
 	normal.bg_color = color
 	normal.set_corner_radius_all(10)
@@ -187,6 +248,8 @@ func _make_button(
 		normal
 	)
 
+	# Hover
+
 	var hover := StyleBoxFlat.new()
 	hover.bg_color = color.lightened(0.15)
 	hover.set_corner_radius_all(10)
@@ -196,6 +259,8 @@ func _make_button(
 		"hover",
 		hover
 	)
+
+	# Pressed
 
 	var pressed := StyleBoxFlat.new()
 	pressed.bg_color = color.darkened(0.15)
