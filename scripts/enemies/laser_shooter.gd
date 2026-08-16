@@ -1,7 +1,7 @@
 extends EnemyBase
 class_name LaserShooter
 
-@export var laser_range: float = 2000.0
+@export var laser_range: float = 4000.0
 @export var laser_width: float = 14.0
 @export var laser_damage: float = 15.0
 @export var telegraph_duration: float = 0.8
