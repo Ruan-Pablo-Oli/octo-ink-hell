@@ -58,6 +58,7 @@ const MAX_VALUE_FOR_BASE_WIDTH := 100.0
 
 func _ready() -> void:
 	layer = 20
+	add_to_group("hud")
 
 	_root = Control.new()
 	_root.set_anchors_preset(Control.PRESET_FULL_RECT)
@@ -270,6 +271,13 @@ func _build_hud() -> void:
 # VALUE LABEL VISIBILITY
 # =========================================================
 
+func get_show_values() -> bool:
+	return SHOW_VALUES
+
+func set_show_values(value: bool) -> void:
+	SHOW_VALUES = value
+	_update_value_labels_visibility()
+	
 func _update_value_labels_visibility() -> void:
 
 	if _hp_value_label:

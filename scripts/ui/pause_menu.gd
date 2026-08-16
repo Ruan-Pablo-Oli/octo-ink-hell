@@ -9,6 +9,12 @@ var _panel: PanelContainer
 var _is_paused: bool = false
 var _music_bus_idx: int = -1
 
+func _on_options_pressed() -> void:
+	var options := get_tree().get_first_node_in_group("options_screen")
+	if options == null:
+		return
+	_panel.visible = false
+	options.open(func() -> void: _panel.visible = true)
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
@@ -57,15 +63,21 @@ func _ready() -> void:
 	spacer.custom_minimum_size = Vector2(0, 6)
 	vbox.add_child(spacer)
 
-	_add_music_controls(vbox)
+
 
 	var spacer2 := Control.new()
 	spacer2.custom_minimum_size = Vector2(0, 6)
 	vbox.add_child(spacer2)
 
+	
 	var resume_btn := _make_button("Continuar", ACCENT_COLOR)
 	resume_btn.pressed.connect(_on_resume_pressed)
 	vbox.add_child(resume_btn)
+	
+	var options_btn := _make_button("Opções", Color(0.35, 0.45, 0.55))
+	options_btn.pressed.connect(_on_options_pressed)
+	vbox.add_child(options_btn)
+	
 	var quit_btn := _make_button("Sair", Color(0.55, 0.2, 0.25))
 	quit_btn.pressed.connect(_on_quit_pressed)
 	vbox.add_child(quit_btn)

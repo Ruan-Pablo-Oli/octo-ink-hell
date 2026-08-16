@@ -44,6 +44,7 @@ const LOGO_TEXTURE := preload(
 
 @export_file("*.tscn") var game_scene: String = "res://scenes/main.tscn"
 @export var game_version: String = "v0.1.0"
+const OptionsScreenScript := preload("res://scripts/ui/options_screen.gd")
 
 
 # ============================================================
@@ -89,6 +90,10 @@ func _ready() -> void:
 
 	_play_button.grab_focus()
 
+	var options := CanvasLayer.new()
+	options.name = "OptionsScreen"
+	options.set_script(OptionsScreenScript)
+	add_child(options)
 	# --------------------------------------------------------
 	# MENU ENTRANCE
 	# --------------------------------------------------------
@@ -369,6 +374,10 @@ func _build_menu() -> void:
 	vbox.add_child(_play_button)
 
 
+	var options_btn := _make_button("Opções", Color(0.35, 0.45, 0.55))
+	options_btn.pressed.connect(_on_options_pressed)
+	vbox.add_child(options_btn)
+
 	# ========================================================
 	# QUIT
 	# ========================================================
@@ -593,7 +602,10 @@ func _on_play_pressed() -> void:
 
 
 func _on_options_pressed() -> void:
-	print("Options")
+	var options := get_tree().get_first_node_in_group("options_screen")
+	if options == null:
+		return
+	options.open()
 
 
 func _on_quit_pressed() -> void:

@@ -6,6 +6,7 @@ const InkOverlayScript := preload("res://scripts/systems/ink_overlay.gd")
 const WaveManagerScript := preload("res://scripts/systems/wave_manager.gd")
 const UpgradeScreenScene := preload("res://scenes/ui/upgrade_screen.tscn")
 const PauseMenuScript := preload("res://scripts/ui/pause_menu.gd")
+const OptionsScreenScript := preload("res://scripts/ui/options_screen.gd")
 const GameOverScene := preload("res://scenes/ui/end_game.tscn")
 const EnemyIndicatorsScript := preload("res://scripts/systems/enemy_indicator.gd")
 
@@ -25,6 +26,12 @@ func _ready() -> void:
 	indicators.add_child(
 		indicator_canvas
 	)
+	
+	
+	var options := CanvasLayer.new()
+	options.name = "OptionsScreen"
+	options.set_script(OptionsScreenScript)
+	add_child(options)	
 	
 	add_child(ArenaScene.instantiate())
 	var entities := Node2D.new()
