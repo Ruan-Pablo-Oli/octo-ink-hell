@@ -7,7 +7,7 @@ const LaserShooterScene := preload("res://scenes/enemies/laser_shooter.tscn")
 const BomberShooterScene := preload("res://scenes/enemies/bomber_shooter.tscn")
 
 ## Keeps spawns off the wall itself.
-const SPAWN_MARGIN := 60.0
+const SPAWN_MARGIN := 40.0
 
 @export var base_count: int = 8
 @export var per_wave: int = 3
@@ -18,7 +18,7 @@ const SPAWN_MARGIN := 60.0
 @export var growth_factor: float = 1.35
 
 @export_group("Limits")
-@export var max_alive_enemies: int = 60  ## teto de inimigos vivos ao mesmo tempo
+@export var max_alive_enemies: int = 80  ## teto de inimigos vivos ao mesmo tempo
 @export var view_margin: float = 80.0  ## distancia extra alem da borda da tela pra considerar "fora de vista"
 @export var spawn_retry_interval: float = 0.15  ## espera antes de tentar de novo quando o teto esta cheio
 

@@ -1,0 +1,15 @@
+[gd_resource type="Resource" script_class="UpgradeData" format=3 uid="uid://1i3pn0yodsn3"]
+
+[ext_resource type="Script" uid="uid://dvxlmkgi7nds3" path="res://resources/upgrade_effect.gd" id="1_3vsbv"]
+[ext_resource type="Script" uid="uid://cuwo4rfww8r6u" path="res://resources/upgrade_data.gd" id="2_7kyef"]
+
+[sub_resource type="Resource" id="Resource_yx3a4"]
+script = ExtResource("1_3vsbv")
+stat = 21
+add = 1.0
+
+[resource]
+script = ExtResource("2_7kyef")
+display_name = "Poça de Tinta"
+description = "Os inimigos passam a ter chance de gerar uma poça que da dano a inimigos que passarem por ela"
+effects = Array[ExtResource("1_3vsbv")]([SubResource("Resource_yx3a4")])

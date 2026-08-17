@@ -39,12 +39,30 @@ var _facing: FacingDir = FacingDir.BOTTOM_RIGHT
 
 func _ready() -> void:
 	if data == null:
-		data = preload("res://resources/weapons/basic_ink.tres")
-	runtime = data.duplicate() as WeaponData
+		push_error(
+			"Weapon '%s' não possui WeaponData configurado!"
+			% get_path()
+		)
+		return
+
+	runtime = data.duplicate(true) as WeaponData
+
+	print("=== WEAPON DEBUG ===")
+	print("Weapon: ", get_path())
+	print("Data: ", data.resource_path)
+	print("Data projectile_damage: ", data.projectile_damage)
+	print("Data fire_rate: ", data.fire_rate)
+	print("Data ink_cost: ", data.ink_cost)
+	print("Data projectiles_per_shot: ", data.projectiles_per_shot)
+
+	print("Runtime projectile_damage: ", runtime.projectile_damage)
+	print("Runtime fire_rate: ", runtime.fire_rate)
+	print("Runtime ink_cost: ", runtime.ink_cost)
+	print("Runtime projectiles_per_shot: ", runtime.projectiles_per_shot)
+
 	GameEvents.upgrades_changed.connect(recompute)
 	recompute()
 	_setup_sprite()
-
 func _setup_sprite() -> void:
 	_has_sprites = sprite_top_left != null and sprite_top_right != null \
 		and sprite_bottom_left != null and sprite_bottom_right != null

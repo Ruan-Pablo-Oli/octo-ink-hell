@@ -23,6 +23,7 @@ enum Stat {
 	DASH_INVINCIBLE,
 	HEALTH,
 	HEALTH_REGEN,
+	POISON_PUDDLE,
 	
 }
 

@@ -1,0 +1,7 @@
+[gd_scene format=3 uid="uid://b44vd0nc0j0sy"]
+
+[ext_resource type="Script" uid="uid://c2f8fgncfgvei" path="res://scripts/player/upgrades/poison_puddle.gd" id="1_32k8b"]
+
+[node name="PoisonPuddle" type="Area2D" unique_id=708907573]
+script = ExtResource("1_32k8b")
+color = Color(0.06053035, 0.06053035, 0.060530342, 0.6392157)

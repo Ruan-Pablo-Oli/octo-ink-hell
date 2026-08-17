@@ -2,12 +2,20 @@
 
 [ext_resource type="Script" uid="uid://f2wuf7aexghg" path="res://scripts/player/weapons/laser_weapon.gd" id="1_xq2uu"]
 [ext_resource type="Texture2D" uid="uid://7d6ymh2bl11r" path="res://assets/sprites/weapon/arma_sprite_facing_top_left.png" id="2_l1c6b"]
+[ext_resource type="Script" uid="uid://cxmcwdmdv7d27" path="res://resources/weapon_data.gd" id="2_vyle2"]
 [ext_resource type="Texture2D" uid="uid://c3ftgwpj2xbxe" path="res://assets/sprites/weapon/arma_sprite_facing_top_right.png" id="3_vyle2"]
 [ext_resource type="Texture2D" uid="uid://dc51d4muwxboi" path="res://assets/sprites/weapon/arma_sprite_facing_left.png" id="4_p3i4t"]
 [ext_resource type="Texture2D" uid="uid://b3qsieql2ydu3" path="res://assets/sprites/weapon/arma_sprite_facing_right.png" id="5_7y4vu"]
 
+[sub_resource type="Resource" id="Resource_kv7aj"]
+script = ExtResource("2_vyle2")
+display_name = "Laser"
+ink_cost = 12.0
+metadata/_custom_type_script = "uid://cxmcwdmdv7d27"
+
 [node name="LaserWeapon" type="Node2D" unique_id=1826522862]
 script = ExtResource("1_xq2uu")
+data = SubResource("Resource_kv7aj")
 sprite_top_left = ExtResource("2_l1c6b")
 sprite_top_right = ExtResource("3_vyle2")
 sprite_bottom_left = ExtResource("4_p3i4t")
