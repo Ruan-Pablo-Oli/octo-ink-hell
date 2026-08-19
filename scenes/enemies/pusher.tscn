@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://daf1p1k6v65nq"]
+
+[ext_resource type="Script" uid="uid://bg5xlnf6qqacp" path="res://scripts/enemies/pusher.gd" id="1_ux281"]
+
+[node name="Shooter" type="CharacterBody2D" unique_id=2084239633]
+script = ExtResource("1_ux281")

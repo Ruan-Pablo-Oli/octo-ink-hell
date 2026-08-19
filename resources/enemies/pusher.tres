@@ -1,0 +1,8 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://3k2jyret1c24"]
+
+[ext_resource type="Script" uid="uid://8twel2doh3k1" path="res://resources/enemy_data.gd" id="1_bjs2n"]
+
+[resource]
+script = ExtResource("1_bjs2n")
+display_name = "Empurrador"
+body_color = Color(0.1374371, 0.5420668, 0.93656677, 1)

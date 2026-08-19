@@ -1,4 +1,6 @@
 extends Node2D
+
+const DebugSpawnPanelScript := preload("res://scripts/ui/debug_spawn_panel.gd")
 const ArenaScene := preload("res://scenes/world/arena.tscn")
 const PlayerScene := preload("res://scenes/player/player.tscn")
 const HudScene := preload("res://scenes/ui/hud.tscn")
@@ -32,6 +34,11 @@ func _ready() -> void:
 	options.name = "OptionsScreen"
 	options.set_script(OptionsScreenScript)
 	add_child(options)	
+	
+	var debug_panel := CanvasLayer.new()
+	debug_panel.name = "DebugSpawnPanel"
+	debug_panel.set_script(DebugSpawnPanelScript)
+	add_child(debug_panel)
 	
 	add_child(ArenaScene.instantiate())
 	var entities := Node2D.new()

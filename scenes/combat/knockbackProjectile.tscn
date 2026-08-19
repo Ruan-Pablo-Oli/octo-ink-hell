@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bis06hrq7w655"]
+
+[ext_resource type="Script" uid="uid://b05l00ghe4dlh" path="res://scripts/combat/knockbackProjectile.gd" id="1_0v03b"]
+
+[node name="EnemyProjectile" type="Area2D" unique_id=1777119811]
+script = ExtResource("1_0v03b")

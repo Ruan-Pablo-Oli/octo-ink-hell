@@ -5,9 +5,14 @@ const ShooterScene := preload("res://scenes/enemies/shooter.tscn")
 const DasherScene := preload("res://scenes/enemies/dasher.tscn")
 const LaserShooterScene := preload("res://scenes/enemies/laser_shooter.tscn")
 const BomberShooterScene := preload("res://scenes/enemies/bomber_shooter.tscn")
+const PusherScene := preload("res://scenes/enemies/pusher.tscn")
 
 ## Keeps spawns off the wall itself.
 const SPAWN_MARGIN := 40.0
+
+@export_group("Debug")
+@export var debug_mode: bool = false
+
 
 @export var base_count: int = 8
 @export var per_wave: int = 3
@@ -46,6 +51,11 @@ const SPAWN_MARGIN := 40.0
 @export var bomber_start_count: int = 1
 @export var bomber_cap: int = 100
 
+@export_group("Pusher")
+@export var pusher_unlock_wave: int = 2
+@export var pusher_start_count: int = 1
+@export var pusher_cap: int = 100
+
 
 var wave: int = 0
 var _to_spawn: int = 0
@@ -78,6 +88,12 @@ func _type_configs() -> Array:
 			"cap": laser_cap
 		},
 		{
+			"scene": PusherScene,
+			"unlock_wave": pusher_unlock_wave,
+			"start_count": pusher_start_count,
+			"cap": pusher_cap
+		},
+		{
 			"scene": DasherScene,
 			"unlock_wave": dasher_unlock_wave,
 			"start_count": dasher_start_count,
@@ -97,6 +113,10 @@ func _ready() -> void:
 	GameEvents.upgrade_selected.connect(_on_upgrade_selected)
 
 	_player = get_tree().get_first_node_in_group("player")
+
+	if debug_mode:
+		return  ## nao inicia waves - spawns manuais via DebugSpawnPanel
+
 
 	_start_next_wave()
 
@@ -125,6 +145,9 @@ func _start_next_wave() -> void:
 
 
 func _process(delta: float) -> void:
+	if debug_mode:
+		return
+		
 	if not _running or _to_spawn <= 0:
 		return
 

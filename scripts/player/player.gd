@@ -26,6 +26,12 @@ enum Tool {
 @export var wipe_radius: float = 55.0
 @export var wipe_cost: float = 1.5
 
+@export var dash_end_knockback: float = 400.0  ## empurrao residwual ao terminar o dash
+var _was_dashing: bool = false
+@export var knockback_recovery: float = 12.0  ## quao rapido o knockback perde forca
+
+var _knockback: Vector2 = Vector2.ZERO
+
 
 # =========================================================
 # SPRITES
@@ -313,6 +319,9 @@ func _ready() -> void:
 	laser_weapon.upgrades = upgrades
 
 	add_child(laser_weapon)
+
+
+
 
 
 	# =====================================================
@@ -696,6 +705,12 @@ func _switch_weapon() -> void:
 # PHYSICS
 # =========================================================
 
+func apply_knockback(dir: Vector2, force: float) -> void:
+	if not _alive:
+		return
+	_knockback += dir.normalized() * force
+
+
 func _physics_process(delta: float) -> void:
 
 	if not _alive:
@@ -791,6 +806,8 @@ func _physics_process(delta: float) -> void:
 			* dash_speed
 		)
 
+		_was_dashing = true
+
 
 		# -------------------------------------------------
 		# DASH TRAIL
@@ -823,6 +840,10 @@ func _physics_process(delta: float) -> void:
 		if _dash_timer <= 0.0:
 
 			_set_dash_shader(false)
+
+			apply_knockback(_dash_dir, dash_end_knockback)
+
+			_was_dashing = false
 
 
 	# =====================================================
@@ -877,7 +898,14 @@ func _physics_process(delta: float) -> void:
 	# MOVE
 	# =====================================================
 
+	velocity += _knockback
+
 	move_and_slide()
+
+	_knockback = _knockback.move_toward(
+		Vector2.ZERO,
+		knockback_recovery * dash_speed * delta
+	)
 
 
 	# =====================================================
@@ -935,7 +963,6 @@ func _physics_process(delta: float) -> void:
 	_wiggle += delta
 
 	queue_redraw()
-
 
 # =========================================================
 # FACING SPRITE
