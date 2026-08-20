@@ -1,0 +1,11 @@
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://pb30s7lesr61"]
+
+[ext_resource type="Script" uid="uid://8twel2doh3k1" path="res://resources/enemy_data.gd" id="1_jlmjw"]
+
+[resource]
+script = ExtResource("1_jlmjw")
+display_name = "boss"
+max_health = 2000.0
+move_speed = 0.0
+body_color = Color(1, 1, 1, 1)
+body_radius = 28.0

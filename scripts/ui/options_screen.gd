@@ -93,6 +93,37 @@ func _build_controls() -> void:
 			if hud:
 				hud.set_show_values(on)
 	)
+	
+	# --- NOVA OPÇÃO: MODO DEBUG ---
+	_add_toggle_row(
+		"Modo Debug",
+		func() -> bool:
+			var wm := _get_wave_manager()
+			return wm.debug_mode if wm != null else false,
+		func(on: bool) -> void:
+			var wm := _get_wave_manager()
+			if wm != null:
+				wm.debug_mode = on
+				
+				# Se desligar o debug mode e a wave 0 nem começou ainda, inicia o jogo!
+				if not on and not wm._running and wm.wave == 0:
+					wm._start_next_wave()
+	)
+
+
+func _get_wave_manager() -> Node:
+	var main_scene = get_tree().current_scene
+	if main_scene != null:
+		# Tenta achar diretamente no Main
+		var wm = main_scene.get_node_or_null("WaveManager")
+		if wm != null:
+			return wm
+			
+	# Plano B: Procura em toda a árvore
+	if get_tree().root:
+		return get_tree().root.find_child("WaveManager", true, false)
+		
+	return null
 
 func _add_slider_row(
 	label_text: String,

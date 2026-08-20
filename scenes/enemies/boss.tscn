@@ -1,0 +1,11 @@
+[gd_scene format=3 uid="uid://thrug27ax7bn"]
+
+[ext_resource type="Script" uid="uid://b7hvwiiugwubr" path="res://scripts/bosses/base_boss.gd" id="1_ub7yk"]
+[ext_resource type="PackedScene" uid="uid://va1206d6pe4d" path="res://scenes/combat/enemyProjectile.tscn" id="2_ian0n"]
+[ext_resource type="PackedScene" uid="uid://bis06hrq7w655" path="res://scenes/combat/knockbackProjectile.tscn" id="3_yye4w"]
+
+[node name="Boss" type="CharacterBody2D" unique_id=1637468047]
+script = ExtResource("1_ub7yk")
+radial_projectile = ExtResource("2_ian0n")
+spiral_projectile = ExtResource("2_ian0n")
+shotgun_projectile = ExtResource("3_yye4w")

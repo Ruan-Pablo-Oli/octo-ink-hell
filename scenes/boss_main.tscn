@@ -1,0 +1,6 @@
+[gd_scene format=3 uid="uid://bgodg0mv5ebe0"]
+
+[ext_resource type="Script" uid="uid://lc0nq0gcid4x" path="res://scripts/boss_main.gd" id="1_68qqp"]
+
+[node name="BossArena" type="Node2D" unique_id=2087837048]
+script = ExtResource("1_68qqp")

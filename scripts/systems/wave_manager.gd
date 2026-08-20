@@ -11,7 +11,7 @@ const PusherScene := preload("res://scenes/enemies/pusher.tscn")
 const SPAWN_MARGIN := 40.0
 
 @export_group("Debug")
-@export var debug_mode: bool = false
+@export var debug_mode: bool = true
 
 
 @export var base_count: int = 8

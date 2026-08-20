@@ -1,6 +1,6 @@
-[gd_scene load_steps=2 format=3]
+[gd_scene format=3 uid="uid://b5id3shtj23k"]
 
-[ext_resource type="Script" path="res://scripts/enemies/swarmer.gd" id="1"]
+[ext_resource type="Script" uid="uid://by584t1yvno8s" path="res://scripts/enemies/swarmer.gd" id="1"]
 
-[node name="Swarmer" type="CharacterBody2D"]
+[node name="Swarmer" type="CharacterBody2D" unique_id=1490500900]
 script = ExtResource("1")

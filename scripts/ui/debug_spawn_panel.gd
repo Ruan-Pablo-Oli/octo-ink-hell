@@ -7,6 +7,10 @@ const DasherScene := preload("res://scenes/enemies/dasher.tscn")
 const LaserShooterScene := preload("res://scenes/enemies/laser_shooter.tscn")
 const BomberShooterScene := preload("res://scenes/enemies/bomber_shooter.tscn")
 const PusherScene := preload("res://scenes/enemies/pusher.tscn")
+const BossScene := preload("res://scenes/bosses/boss.tscn")
+
+# Lá no debug_spawn_panel.gd
+const BossArenaPath := "res://scenes/boss_main.tscn" 
 
 const ACCENT_COLOR := Color(0.561, 0.003, 0.839, 1.0)
 const PANEL_BG := Color(0.148, 0.001, 0.21, 0.9)
@@ -58,6 +62,7 @@ func _ready() -> void:
 	_add_spawn_button(vbox, "LaserShooter", LaserShooterScene)
 	_add_spawn_button(vbox, "BomberShooter", BomberShooterScene)
 	_add_spawn_button(vbox, "Pusher", PusherScene)
+	_add_spawn_button(vbox, "Boss", BossScene)
 
 	var sep := HSeparator.new()
 	vbox.add_child(sep)
@@ -66,6 +71,18 @@ func _ready() -> void:
 	clear_btn.text = "Limpar todos"
 	clear_btn.pressed.connect(_clear_all)
 	vbox.add_child(clear_btn)
+	
+	var sep2 := HSeparator.new()
+	vbox.add_child(sep2)
+	
+	# --- NOVO BOTÃO DE TELEPORTE ---
+	var arena_btn := Button.new()
+	arena_btn.text = "TELEPORT: Boss Arena"
+	arena_btn.custom_minimum_size = Vector2(160, 32)
+	# Pinta o texto de laranja para não confundir com spawns normais
+	arena_btn.add_theme_color_override("font_color", Color(1.0, 0.6, 0.0)) 
+	arena_btn.pressed.connect(_teleport_to_boss_arena)
+	vbox.add_child(arena_btn)
 
 func _add_spawn_button(vbox: VBoxContainer, label: String, scene: PackedScene) -> void:
 	var btn := Button.new()
@@ -99,3 +116,8 @@ func _clear_all() -> void:
 	for enemy in get_tree().get_nodes_in_group("enemies"):
 		if is_instance_valid(enemy):
 			enemy.queue_free()
+
+func _teleport_to_boss_arena() -> void:
+	_visible = false
+	_panel.visible = false
+	get_tree().change_scene_to_file(BossArenaPath)
