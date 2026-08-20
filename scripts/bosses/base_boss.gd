@@ -9,10 +9,11 @@ class_name Boss
 @export var star_projectile: PackedScene
 @export var windmill_projectile: PackedScene
 @export var meteor_projectile: PackedScene 
+@export var cleaning_pickup_scene: PackedScene 
 
 # --- CONFIGURAÇÕES DE ATAQUE E KNOCKBACK ---
 @export_group("Attack Settings")
-@export var group_b_start_delay: float = 1.5 # <--- Adicione esta linha!
+@export var group_b_start_delay: float = 1.5
 @export var pattern_duration: float = 4.0
 @export var knockback_speed: float = 400.0
 @export var knockback_force: float = 800.0
@@ -23,6 +24,14 @@ class_name Boss
 @export var normal_damage: float = 15.0
 @export var normal_lifespan: float = 5.0
 @export var normal_color: Color = Color(1.0, 0.2, 0.2, 1.0) 
+
+# --- CONFIGURAÇÕES DA ESCOPETA ---
+@export_group("Shotgun Settings")
+@export var shotgun_pickup_distance: float = 400.0 # Distância que o item desliza
+@export var shotgun_pickup_bursts: Array[int] = [1,4] # Em quais rajadas ele solta (ex: na 3ª rajada)
+
+# (Coloque esta variável junto com as outras variáveis de estado, como _star_angle)
+var _shotgun_burst_count: int = 0
 
 # --- DIVISÃO DOS GRUPOS DE ATAQUE ---
 enum PatternA { IDLE, RADIAL, SPIRAL, STAR, WINDMILL }
@@ -78,11 +87,11 @@ func _move(delta: float) -> void:
 	queue_redraw()
 
 func _choose_next_patterns() -> void:
-	# Limpeza do Windmill anterior (se houver)
 	if _windmill_pivot != null:
 		_windmill_pivot.queue_free()
 		_windmill_pivot = null
-		
+	
+	_shotgun_burst_count = 0 
 	# Sorteia um ataque do Grupo A (1 a 4)
 	current_pattern_a = (randi() % 4) as PatternA + 1 
 	
@@ -178,12 +187,22 @@ func _update_mortars(delta: float) -> void:
 			_active_mortars.remove_at(i)
 
 func _explode_mortar(pos: Vector2) -> void:
+	if cleaning_pickup_scene != null:
+		var entities := get_tree().get_first_node_in_group("entities")
+		if entities == null:
+			entities = get_tree().current_scene
+			
+		var pickup = cleaning_pickup_scene.instantiate()
+		entities.add_child(pickup)
+		pickup.global_position = pos
+	# ----------------------------------------------------
+
+	# Lógica que já existia para as balas do meteoro
 	var proj_count = 10
 	for i in proj_count:
 		var angle = (float(i) / proj_count) * TAU
 		var dir = Vector2.RIGHT.rotated(angle)
 		_spawn_projectile_at(pos, dir, meteor_projectile)
-
 # ---------------------------------------------------------
 # DESENHANDO O AVISO VISUAL (TELEGRAPH)
 # ---------------------------------------------------------
@@ -236,17 +255,39 @@ func _fire_spiral() -> void:
 	_spawn_projectile(dir_oposta, spiral_projectile)
 
 func _fire_shotgun() -> void:
-	var proj_count = 5
+	_shotgun_burst_count += 1 # Soma +1 toda vez que atira
+	
+	var proj_count = 7
 	var spread_angle = PI / 4.0 
 	var dir_to_player = (_player.global_position - global_position).normalized()
 	var base_angle = dir_to_player.angle()
 	
+	# 1. Atira as balas normais da escopeta
 	for i in proj_count:
 		var t = float(i) / float(proj_count - 1)
 		var offset = lerpf(-spread_angle / 2.0, spread_angle / 2.0, t)
 		var final_dir = Vector2.RIGHT.rotated(base_angle + offset)
 		_spawn_projectile(final_dir, shotgun_projectile)
-
+		
+	# 2. Verifica se a rajada atual está na lista permitida para soltar o item
+	if _shotgun_burst_count in shotgun_pickup_bursts:
+		if cleaning_pickup_scene != null:
+			var entities := get_tree().get_first_node_in_group("entities")
+			if entities == null:
+				entities = get_tree().current_scene
+				
+			var pickup = cleaning_pickup_scene.instantiate()
+			entities.add_child(pickup)
+			
+			# O item nasce no Boss
+			pickup.global_position = global_position
+			
+			# Usa a nova variável de distância configurável no Inspector
+			var target_pos = global_position + dir_to_player * shotgun_pickup_distance
+			
+			# Cria a animação de arremesso (Tween)
+			var tween = create_tween()
+			tween.tween_property(pickup, "global_position", target_pos, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
 func _fire_star() -> void:
 	var arms = 5 
 	_star_angle += 0.15 

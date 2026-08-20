@@ -13,7 +13,7 @@ var _on_close: Callable = Callable()
 
 func _ready() -> void:
 	process_mode = Node.PROCESS_MODE_ALWAYS
-	layer = 110  ## acima do PauseMenu (100)
+	layer = 110
 	visible = false
 	add_to_group("options_screen")
 
@@ -60,11 +60,16 @@ func _ready() -> void:
 	title.add_theme_color_override("font_color", Color(0.95, 0.92, 1.0))
 	_vbox.add_child(title)
 
+	# --- A MÁGICA ESTÁ AQUI ---
+	# Espera o main.gd terminar de colocar todos os nós na cena antes de gerar os botões
+	await get_tree().process_frame
+
 	_build_controls()
 
 	var back_btn := _make_button("Voltar", ACCENT_COLOR)
 	back_btn.pressed.connect(close)
 	_vbox.add_child(back_btn)
+
 
 func _build_controls() -> void:
 	_add_slider_row(
@@ -94,7 +99,6 @@ func _build_controls() -> void:
 				hud.set_show_values(on)
 	)
 	
-	# --- NOVA OPÇÃO: MODO DEBUG ---
 	_add_toggle_row(
 		"Modo Debug",
 		func() -> bool:
@@ -111,27 +115,12 @@ func _build_controls() -> void:
 	)
 
 
+# A busca agora usa o grupo que criamos no Passo 1. É 100% à prova de falhas!
 func _get_wave_manager() -> Node:
-	var main_scene = get_tree().current_scene
-	if main_scene != null:
-		# Tenta achar diretamente no Main
-		var wm = main_scene.get_node_or_null("WaveManager")
-		if wm != null:
-			return wm
-			
-	# Plano B: Procura em toda a árvore
-	if get_tree().root:
-		return get_tree().root.find_child("WaveManager", true, false)
-		
-	return null
+	return get_tree().get_first_node_in_group("wave_manager")
 
-func _add_slider_row(
-	label_text: String,
-	get_value: Callable,
-	set_value: Callable,
-	get_muted: Callable = Callable(),
-	set_muted: Callable = Callable()
-) -> void:
+
+func _add_slider_row(label_text: String, get_value: Callable, set_value: Callable, get_muted: Callable = Callable(), set_muted: Callable = Callable()) -> void:
 	var row := HBoxContainer.new()
 	row.add_theme_constant_override("separation", 10)
 	_vbox.add_child(row)

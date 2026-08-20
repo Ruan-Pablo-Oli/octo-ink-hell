@@ -109,6 +109,8 @@ func _type_configs() -> Array:
 
 
 func _ready() -> void:
+	add_to_group("wave_manager") 
+	
 	GameEvents.enemy_killed.connect(_on_enemy_killed)
 	GameEvents.upgrade_selected.connect(_on_upgrade_selected)
 

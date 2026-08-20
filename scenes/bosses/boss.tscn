@@ -2,6 +2,7 @@
 
 [ext_resource type="Script" uid="uid://b7hvwiiugwubr" path="res://scripts/bosses/base_boss.gd" id="1_buxl7"]
 [ext_resource type="PackedScene" uid="uid://va1206d6pe4d" path="res://scenes/combat/enemyProjectile.tscn" id="2_tsxae"]
+[ext_resource type="PackedScene" path="res://scenes/pickups/cleaning_item.tscn" id="3_tsxae"]
 [ext_resource type="Resource" uid="uid://pb30s7lesr61" path="res://resources/enemies/boss.tres" id="4_tsxae"]
 
 [node name="Boss" type="CharacterBody2D" unique_id=1918130495]
@@ -12,4 +13,5 @@ shotgun_projectile = ExtResource("2_tsxae")
 star_projectile = ExtResource("2_tsxae")
 windmill_projectile = ExtResource("2_tsxae")
 meteor_projectile = ExtResource("2_tsxae")
+cleaning_pickup_scene = ExtResource("3_tsxae")
 data = ExtResource("4_tsxae")

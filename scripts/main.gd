@@ -13,52 +13,48 @@ const GameOverScene := preload("res://scenes/ui/end_game.tscn")
 const EnemyIndicatorsScript := preload("res://scripts/systems/enemy_indicator.gd")
 
 func _ready() -> void:
+	# --- 2. SISTEMAS E UI ---
 	var indicators := CanvasLayer.new()
 	indicators.name = "EnemyIndicators"
-	# Importante:
-	# CanvasLayer controla a camada do indicador.
 	indicators.layer = 15
 	add_child(indicators)
-	# Node2D que realmente desenha as setas.
+	
 	var indicator_canvas := Node2D.new()
 	indicator_canvas.name = "IndicatorCanvas"
-	indicator_canvas.set_script(
-		EnemyIndicatorsScript
-	)
-	indicators.add_child(
-		indicator_canvas
-	)
-	
+	indicator_canvas.set_script(EnemyIndicatorsScript)
+	indicators.add_child(indicator_canvas)
 	
 	var options := CanvasLayer.new()
 	options.name = "OptionsScreen"
 	options.set_script(OptionsScreenScript)
-	add_child(options)	
+	add_child(options)    
 	
 	var debug_panel := CanvasLayer.new()
 	debug_panel.name = "DebugSpawnPanel"
 	debug_panel.set_script(DebugSpawnPanelScript)
 	add_child(debug_panel)
 	
+	# --- 3. ARENA E ENTIDADES ---
 	add_child(ArenaScene.instantiate())
+	
 	var entities := Node2D.new()
 	entities.name = "Entities"
 	entities.add_to_group("entities")
 	add_child(entities)
+	
 	var overlay := CanvasLayer.new()
 	overlay.name = "InkOverlay"
 	overlay.set_script(InkOverlayScript)
 	add_child(overlay)
+	
 	add_child(HudScene.instantiate())
 	add_child(UpgradeScreenScene.instantiate())
+	
 	var player := PlayerScene.instantiate()
 	player.global_position = Vector2.ZERO
 	entities.add_child(player)
-	var waves := Node.new()
-	waves.name = "WaveManager"
-	waves.set_script(WaveManagerScript)
-	add_child(waves)
 	
+	# --- 4. MENUS FINAIS ---
 	add_child(GameOverScene.instantiate())
 		
 	var pause_menu := CanvasLayer.new()
