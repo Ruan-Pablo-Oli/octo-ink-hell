@@ -14,7 +14,7 @@ class_name Boss
 # --- CONFIGURAÇÕES DE ATAQUE E KNOCKBACK ---
 @export_group("Attack Settings")
 @export var group_b_start_delay: float = 1.5
-@export var pattern_duration: float = 4.0
+@export var pattern_duration: float = 6.0
 @export var knockback_speed: float = 400.0
 @export var knockback_force: float = 800.0
 
@@ -29,6 +29,10 @@ class_name Boss
 @export_group("Shotgun Settings")
 @export var shotgun_pickup_distance: float = 400.0 # Distância que o item desliza
 @export var shotgun_pickup_bursts: Array[int] = [1,4] # Em quais rajadas ele solta (ex: na 3ª rajada)
+
+
+# Adicione isso perto dos outros preloads (se houver) ou das export variables
+const BossHealthOverlayScript := preload("res://scripts/ui/boss_health_overlay.gd")
 
 # (Coloque esta variável junto com as outras variáveis de estado, como _star_angle)
 var _shotgun_burst_count: int = 0
@@ -62,6 +66,13 @@ var _active_mortars: Array[Dictionary] = []
 func _ready() -> void:
 	super() 
 	_center_pos = global_position
+	
+	# Cria a barra de vida (Você pode alterar o nome do boss aqui)
+	var health_bar = BossHealthOverlayScript.new(self, data.display_name)
+	
+	# Adiciona a barra à tela principal (para que ela não se mova com a câmera/boss)
+	get_tree().current_scene.add_child(health_bar)
+	
 
 func _load_default_data() -> void:
 	if data == null:
@@ -224,8 +235,8 @@ func _draw() -> void:
 # ---------------------------------------------------------
 
 func _spawn_windmill_ring(ring_index: int) -> void:
-	var arms = 6 
-	var spacing = 40.0 
+	var arms = 4
+	var spacing = 45.0 
 	var start_offset = 60.0 
 	
 	for i in arms:
@@ -241,7 +252,7 @@ func _spawn_windmill_ring(ring_index: int) -> void:
 		elif p.has_method("setup"): p.setup(dir, 0.0, normal_damage, pattern_duration, normal_color)
 
 func _fire_radial() -> void:
-	var proj_count = 12
+	var proj_count = 18
 	for i in proj_count:
 		var angle = (float(i) / proj_count) * TAU 
 		var dir = Vector2.RIGHT.rotated(angle)

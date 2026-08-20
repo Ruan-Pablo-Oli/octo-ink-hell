@@ -4,7 +4,7 @@
 
 [resource]
 script = ExtResource("1_jlmjw")
-display_name = "boss"
+display_name = "Boss massa"
 max_health = 2000.0
 move_speed = 0.0
 body_color = Color(1, 1, 1, 1)
