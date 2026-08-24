@@ -85,7 +85,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_ahjmb")
 }],
-"loop": 1,
+"loop": 0,
 "name": &"attack",
 "speed": 12.0
 }, {
@@ -96,7 +96,7 @@ animations = [{
 "duration": 1.0,
 "texture": SubResource("AtlasTexture_lciyy")
 }],
-"loop": 1,
+"loop": 0,
 "name": &"hurt",
 "speed": 12.0
 }, {
@@ -133,6 +133,7 @@ star_projectile = ExtResource("2_tsxae")
 windmill_projectile = ExtResource("2_tsxae")
 meteor_projectile = ExtResource("2_tsxae")
 cleaning_pickup_scene = ExtResource("3_tsxae")
+pattern_a_order = Array[int]([0, 4, 3, 1, 2])
 data = ExtResource("4_tsxae")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2127671049]
