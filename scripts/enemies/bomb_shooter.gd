@@ -13,6 +13,8 @@ const EnemyBombScene := preload("res://scenes/combat/enemyBomb.tscn")
 # --- CONTROLE VISUAL ---
 @export_group("Visuals")
 @export var sprite_scale: Vector2 = Vector2(1.9, 1.9) 
+## Distância que o indicador de windup (a "luz" laranja) aparece à frente do inimigo, na direção do player.
+@export var windup_light_offset: float = 40.0
 
 enum State { IDLE, WINDUP }
 
@@ -46,7 +48,6 @@ func _move(delta: float) -> void:
 				_state_timer = randf_range(throw_cooldown_min, throw_cooldown_max)
 				
 	queue_redraw()
-
 	# --- CONTROLE DAS ANIMAÇÕES BLINDADO ---
 	if sprite:
 		var to_player_x := _player.global_position.x - global_position.x
@@ -98,9 +99,25 @@ func _throw_bomb() -> void:
 	var bomb := EnemyBombScene.instantiate()
 	entities.add_child(bomb)
 	bomb.setup(global_position, target)
-
+	
 func _draw() -> void:
 	if _state == State.WINDUP:
 		var progress: float = 1.0 - (_state_timer / windup_duration)
 		var c := Color(1.0, 0.6, 0.1, 0.3 + 0.5 * progress)
-		draw_circle(Vector2.ZERO, _radius() + 6.0, c)
+		
+		var offset := Vector2(0, -_radius() * 0.8) # Topo da cabeça
+		
+		if _player and is_instance_valid(_player):
+			var to_player_x := _player.global_position.x - global_position.x
+			
+			# Se o player está à direita, deslocamos para a direita (+14). 
+			# Se o player está à esquerda, invertemos para a esquerda (-14).
+			var side_offset = 14.0
+			if to_player_x < 0:
+				side_offset = -14.0
+				
+			offset.x = side_offset
+
+		# Aumentamos um pouco o tamanho como você pediu
+		var circle_radius = _radius() * 1.2
+		draw_circle(offset, circle_radius, c)

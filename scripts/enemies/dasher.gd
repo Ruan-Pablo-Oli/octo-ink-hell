@@ -18,7 +18,6 @@ var _dash_time_left: float = 0.0
 var _dash_timer: float = 0.0
 var _dash_dir: Vector2 = Vector2.ZERO
 
-
 # Sobrescreve o _draw para não desenhar mais os círculos
 func _draw() -> void:
 	pass
@@ -66,16 +65,12 @@ func _move(delta: float) -> void:
 		if velocity.x != 0:
 			sprite.flip_h = velocity.x < 0
 			
-		# Verifica se as animações de prioridade estão ativamente rodando
+		# Verifica se a animação de prioridade está ativamente rodando
 		var is_hurting = sprite.animation == "hurt" and sprite.is_playing()
-		var is_attacking = sprite.animation == "attack" and sprite.is_playing()
 		
-		# Só troca para walk/idle se não estiver sofrendo dano nem dando dash/ataque
-		if not is_hurting and not is_attacking:
-			if _is_dashing:
-				sprite.play("attack")
-				sprite.frame = 0
-			elif velocity.length() > 5.0:  # Pequena margem para evitar vibração parada
+		# Só troca para walk/idle se não estiver sofrendo dano
+		if not is_hurting:
+			if _is_dashing or velocity.length() > 5.0:  # Pequena margem para evitar vibração parada
 				sprite.play("walk")
 			else:
 				sprite.play("idle")

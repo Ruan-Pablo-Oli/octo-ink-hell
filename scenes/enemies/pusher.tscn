@@ -2,15 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bg5xlnf6qqacp" path="res://scripts/enemies/pusher.gd" id="1_ux281"]
 [ext_resource type="Texture2D" uid="uid://e6786gbx6ttc" path="res://assets/sprites/pusher/Attack.png" id="2_7l54p"]
-[ext_resource type="Shader" uid="uid://bbb62mp6pn8kf" path="res://scenes/player/enemy.gdshader" id="2_k5woo"]
 [ext_resource type="Texture2D" uid="uid://b2pac7fwl3vjm" path="res://assets/sprites/pusher/Idle.png" id="3_2itb4"]
 [ext_resource type="Texture2D" uid="uid://cxmfxs685sgi7" path="res://assets/sprites/pusher/Hurt.png" id="3_k5woo"]
 [ext_resource type="Texture2D" uid="uid://cu8hgqnmbkw6e" path="res://assets/sprites/pusher/Walk.png" id="4_k5woo"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_2itb4"]
-shader = ExtResource("2_k5woo")
-shader_parameter/flash_color = Color(0.56, 0, 1, 1)
-shader_parameter/flash_modifier = 0.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_8d6vt"]
 atlas = ExtResource("2_7l54p")
@@ -165,6 +159,5 @@ animations = [{
 script = ExtResource("1_ux281")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=955465969]
-material = SubResource("ShaderMaterial_2itb4")
 sprite_frames = SubResource("SpriteFrames_pcus6")
 animation = &"attack"

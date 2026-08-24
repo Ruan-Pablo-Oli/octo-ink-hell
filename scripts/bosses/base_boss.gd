@@ -13,18 +13,31 @@ class_name Boss
 
 # --- ORDEM DOS PADRÕES ---
 enum PatternA { RADIAL, SPIRAL, STAR, WINDMILL, LASER_SWEEP }
-enum PatternB { METEOR, SHOTGUN }
+enum PatternB { METEOR, SHOTGUN, LASER_SHOTS }
+enum PatternOrderMode { FIXED, RANDOM }
 
 @export_group("Attack Sequences")
+## Padrões do Grupo A, alternando um de cada vez.
 @export var pattern_a_order: Array[PatternA] = [PatternA.RADIAL, PatternA.SPIRAL, PatternA.STAR, PatternA.WINDMILL, PatternA.LASER_SWEEP]
-@export var pattern_b_order: Array[PatternB] = [PatternB.METEOR, PatternB.SHOTGUN]
+## FIXED segue a ordem do array acima. RANDOM sorteia o próximo (nunca repete o mesmo duas vezes seguidas).
+@export var pattern_order_mode_a: PatternOrderMode = PatternOrderMode.FIXED
+## Padrões do Grupo B, alternando um de cada vez — com timer PRÓPRIO, independente do Grupo A,
+## então nunca fica travado esperando o Grupo A trocar de padrão.
+@export var pattern_b_order: Array[PatternB] = [PatternB.METEOR, PatternB.SHOTGUN, PatternB.LASER_SHOTS]
+@export var pattern_order_mode_b: PatternOrderMode = PatternOrderMode.FIXED
 
 # --- CONFIGURAÇÕES DE ATAQUE E KNOCKBACK ---
 @export_group("Attack Settings")
+## Duração de cada padrão do Grupo A antes de trocar para o próximo.
+@export var pattern_duration_a: float = 6.0
+## Duração de cada padrão do Grupo B antes de trocar para o próximo. Independente do Grupo A.
+@export var pattern_duration_b: float = 6.0
 @export var group_b_start_delay: float = 1.5
-@export var pattern_duration: float = 6.0
 @export var knockback_speed: float = 400.0
 @export var knockback_force: float = 800.0
+## Duração real (em segundos) da animação "attack" no SpriteFrames.
+## Usado como fallback caso o sinal animation_finished não dispare.
+@export var attack_anim_duration: float = 0.5
 
 # --- CONFIGURAÇÕES DO PROJÉTIL NORMAL (DANO) ---
 @export_group("Normal Projectile Settings")
@@ -36,10 +49,11 @@ enum PatternB { METEOR, SHOTGUN }
 # --- CONFIGURAÇÕES DA ESCOPETA ---
 @export_group("Shotgun Settings")
 @export var shotgun_pickup_distance: float = 400.0 
+## A cada quantas rajadas um pickup de limpeza aparece. Reinicia sozinho após o último valor da lista.
 @export var shotgun_pickup_bursts: Array[int] = [1, 4] 
 
-# --- CONTROLE DO LASER SWEEP (INDICADORES + DISPARO SEQUENCIAL) ---
-@export_group("Laser Sweep Settings")
+# --- CONTROLE DO LASER SWEEP (INDICADORES + DISPARO SEQUENCIAL - GRUPO A) ---
+@export_group("Laser Sweep Settings (Group A)")
 @export var laser_range: float = 3000.0
 @export var laser_width: float = 18.0
 @export var laser_damage: float = 25.0
@@ -47,6 +61,20 @@ enum PatternB { METEOR, SHOTGUN }
 @export var total_indicators: int = 36
 @export var indicator_interval: float = 0.04    
 @export var firing_interval: float = 0.08       
+
+# --- CONTROLE DA RAJADA DE LASERS MIRADOS (LASER SHOTS - GRUPO B) ---
+# Baseado no LaserShooter: raycast com telegraph, sem projétil físico.
+@export_group("Laser Shots Settings (Group B)")
+@export var laser_shots_count: int = 5
+@export var laser_shots_range: float = 3000.0
+@export var laser_shots_width: float = 14.0
+@export var laser_shots_damage: float = 15.0
+@export var laser_shots_telegraph_duration: float = 0.5
+@export var laser_shots_fire_duration: float = 0.15
+@export var laser_shots_pause: float = 0.3
+@export var laser_shots_aim_prediction: float = 0.35
+## Se a rajada terminar antes do padrão trocar, espera esse tempo e começa outra rajada.
+@export var laser_shots_pattern_cooldown: float = 1.0
 
 # --- CONTROLE VISUAL ---
 @export_group("Visuals")
@@ -56,14 +84,18 @@ const BossHealthOverlayScript := preload("res://scripts/ui/boss_health_overlay.g
 
 var _shotgun_burst_count: int = 0
 
-# Índices de controle da sequência
+# Índices de controle da sequência (independentes entre A e B)
 var _index_a: int = 0
 var _index_b: int = 0
 
 var current_pattern_a: PatternA = PatternA.RADIAL
 var current_pattern_b: PatternB = PatternB.METEOR
 
-var pattern_timer := 0.0
+# Timers de ROTAÇÃO de padrão — cada grupo tem o seu, não se esperam
+var pattern_timer_a := 0.0
+var pattern_timer_b := 0.0
+
+# Timers de EXECUÇÃO (cadência de tiro dentro do padrão ativo)
 var shoot_timer_a := 0.0
 var shoot_timer_b := 0.0
 
@@ -77,13 +109,21 @@ var _windmill_bullet_index: int = 0
 var _windmill_spawn_timer: float = 0.0
 var _windmill_max_bullets: int = 30
 
-# --- VARIÁVEIS DE CONTROLE DO ESTADO DO LASER ---
+# --- VARIÁVEIS DE CONTROLE DO ESTADO DO LASER SWEEP (GRUPO A) ---
 enum LaserState { SPAWNING_INDICATORS, FIRING_SEQUENCE, DONE }
 var _laser_state: LaserState = LaserState.SPAWNING_INDICATORS
 var _laser_angles: Array[float] = []      
 var _current_spawn_index: int = 0         
 var _current_fire_index: int = -1         
 var _step_timer: float = 0.0
+
+# --- VARIÁVEIS DE CONTROLE DA RAJADA MIRADA (LASER SHOTS - GRUPO B) ---
+enum LaserShotPhase { WAITING_INITIAL, AIMING, FIRING, PAUSE, DONE }
+var _laser_shot_phase: LaserShotPhase = LaserShotPhase.WAITING_INITIAL
+var _laser_shot_timer: float = 0.0
+var _laser_shot_dir: Vector2 = Vector2.RIGHT
+var _laser_shot_has_damaged: bool = false
+var _laser_shots_fired: int = 0
 
 # Controle para evitar loop na animação de ataque
 var _is_attacking_anim: bool = false
@@ -105,7 +145,8 @@ func _ready() -> void:
 	var health_bar = BossHealthOverlayScript.new(self, data.display_name if data else "Anomalia Principal")
 	get_tree().current_scene.add_child(health_bar)
 	
-	_choose_next_patterns()
+	_choose_next_pattern_a()
+	_choose_next_pattern_b()
 
 func _load_default_data() -> void:
 	if data == null:
@@ -118,9 +159,15 @@ func _move(delta: float) -> void:
 	velocity = Vector2.ZERO
 	global_position = _center_pos
 	
-	pattern_timer -= delta
-	if pattern_timer <= 0.0:
-		_choose_next_patterns()
+	# Cada grupo roda a própria rotação de padrão de forma independente —
+	# um nunca espera o outro para trocar ou continuar atirando.
+	pattern_timer_a -= delta
+	if pattern_timer_a <= 0.0:
+		_choose_next_pattern_a()
+		
+	pattern_timer_b -= delta
+	if pattern_timer_b <= 0.0:
+		_choose_next_pattern_b()
 		
 	_handle_group_a(delta)
 	_handle_group_b(delta)
@@ -146,27 +193,22 @@ func _on_animation_finished() -> void:
 	if sprite and sprite.animation == "attack":
 		_is_attacking_anim = false
 
-func _choose_next_patterns() -> void:
+# ---------------------------------------------------------
+# GRUPO A - escolha do próximo padrão (fixo ou aleatório)
+# ---------------------------------------------------------
+func _choose_next_pattern_a() -> void:
 	if _windmill_pivot != null:
 		_windmill_pivot.queue_free()
 		_windmill_pivot = null
 	
-	_shotgun_burst_count = 0 
-	
 	if pattern_a_order.is_empty():
 		pattern_a_order = [PatternA.RADIAL, PatternA.SPIRAL, PatternA.STAR, PatternA.WINDMILL, PatternA.LASER_SWEEP]
-	if pattern_b_order.is_empty():
-		pattern_b_order = [PatternB.METEOR, PatternB.SHOTGUN]
-		
-	_index_a = (_index_a + 1) % pattern_a_order.size()
-	_index_b = (_index_b + 1) % pattern_b_order.size()
 	
+	_index_a = _next_index(_index_a, pattern_a_order.size(), pattern_order_mode_a)
 	current_pattern_a = pattern_a_order[_index_a]
-	current_pattern_b = pattern_b_order[_index_b]
 	
-	pattern_timer = pattern_duration
+	pattern_timer_a = pattern_duration_a
 	shoot_timer_a = 0.5 
-	shoot_timer_b = 0.5 + group_b_start_delay
 	
 	if current_pattern_a == PatternA.LASER_SWEEP:
 		_laser_state = LaserState.SPAWNING_INDICATORS
@@ -182,6 +224,41 @@ func _choose_next_patterns() -> void:
 			for i in range(total_indicators):
 				var angle = start_angle + (float(i) / float(total_indicators)) * TAU
 				_laser_angles.append(angle)
+
+# ---------------------------------------------------------
+# GRUPO B - escolha do próximo padrão (fixo ou aleatório), timer PRÓPRIO
+# ---------------------------------------------------------
+func _choose_next_pattern_b() -> void:
+	_shotgun_burst_count = 0
+	
+	if pattern_b_order.is_empty():
+		pattern_b_order = [PatternB.METEOR, PatternB.SHOTGUN, PatternB.LASER_SHOTS]
+	
+	_index_b = _next_index(_index_b, pattern_b_order.size(), pattern_order_mode_b)
+	current_pattern_b = pattern_b_order[_index_b]
+	
+	pattern_timer_b = pattern_duration_b
+	shoot_timer_b = 0.5 + group_b_start_delay
+	
+	if current_pattern_b == PatternB.LASER_SHOTS:
+		_laser_shots_fired = 0
+		_laser_shot_phase = LaserShotPhase.WAITING_INITIAL
+		_laser_shot_timer = 0.5 + group_b_start_delay
+		_laser_shot_has_damaged = false
+
+# Helper compartilhado: decide o próximo índice conforme o modo (fixo ou aleatório),
+# evitando repetir o mesmo padrão duas vezes seguidas no modo aleatório.
+func _next_index(current_index: int, count: int, mode: PatternOrderMode) -> int:
+	if count <= 1:
+		return 0
+	match mode:
+		PatternOrderMode.RANDOM:
+			var new_index := current_index
+			while new_index == current_index:
+				new_index = randi() % count
+			return new_index
+		_:
+			return (current_index + 1) % count
 
 # ---------------------------------------------------------
 # EXECUÇÃO DO GRUPO A
@@ -261,27 +338,98 @@ func _check_single_laser_hit(angle: float) -> void:
 			_player.take_damage(laser_damage)
 
 # ---------------------------------------------------------
-# EXECUÇÃO DO GRUPO B
+# EXECUÇÃO DO GRUPO B (um padrão ativo por vez, rotação própria)
 # ---------------------------------------------------------
 func _handle_group_b(delta: float) -> void:
+	# LASER_SHOTS tem ritmo próprio (rajada de X tiros), não usa o shoot_timer_b comum
+	if current_pattern_b == PatternB.LASER_SHOTS:
+		_handle_laser_shots(delta)
+		return
+		
 	shoot_timer_b -= delta
 	if shoot_timer_b > 0.0:
 		return
 		
 	match current_pattern_b:
 		PatternB.METEOR:
-			_trigger_attack_anim()  # agora não reinicia se já tocando
+			_trigger_attack_anim()
 			_fire_meteor()
 			shoot_timer_b = 1.0
 		PatternB.SHOTGUN:
 			_trigger_attack_anim()
 			_fire_shotgun()
 			shoot_timer_b = 1.0
+
+func _handle_laser_shots(delta: float) -> void:
+	_laser_shot_timer -= delta
+	if _laser_shot_timer > 0.0:
+		return
+		
+	match _laser_shot_phase:
+		LaserShotPhase.WAITING_INITIAL, LaserShotPhase.PAUSE, LaserShotPhase.DONE:
+			_start_laser_shot_aim()
+		LaserShotPhase.AIMING:
+			_fire_laser_shot()
+		LaserShotPhase.FIRING:
+			_laser_shots_fired += 1
+			if _laser_shots_fired >= laser_shots_count:
+				_laser_shots_fired = 0
+				_laser_shot_phase = LaserShotPhase.DONE
+				_laser_shot_timer = laser_shots_pattern_cooldown
+			else:
+				_laser_shot_phase = LaserShotPhase.PAUSE
+				_laser_shot_timer = laser_shots_pause
+
+func _start_laser_shot_aim() -> void:
+	if _player == null or not is_instance_valid(_player):
+		return
+		
+	_laser_shot_phase = LaserShotPhase.AIMING
+	_laser_shot_timer = laser_shots_telegraph_duration
+	_laser_shot_has_damaged = false
+	
+	var player_position := _player.global_position
+	var player_velocity := Vector2.ZERO
+	if _player is CharacterBody2D:
+		player_velocity = _player.velocity
+		
+	var predicted_position := player_position + player_velocity * laser_shots_aim_prediction
+	_laser_shot_dir = (predicted_position - global_position).normalized()
+
+func _fire_laser_shot() -> void:
+	_trigger_attack_anim()  # a animação de ataque começa exatamente no disparo real, como no LaserShooter
+	_laser_shot_phase = LaserShotPhase.FIRING
+	_laser_shot_timer = laser_shots_fire_duration
+	_check_laser_shot_hit()
+
+func _check_laser_shot_hit() -> void:
+	if _laser_shot_has_damaged or _player == null or not is_instance_valid(_player):
+		return
+		
+	var origin := global_position
+	var t := clampf(_laser_shot_dir.dot(_player.global_position - origin), 0.0, laser_shots_range)
+	var closest := origin + _laser_shot_dir * t
+	var player_radius := 10.0
+	
+	if _player.has_method("get_radius"):
+		player_radius = _player.get_radius()
+		
+	if closest.distance_to(_player.global_position) <= laser_shots_width * 0.5 + player_radius:
+		if _player.has_method("take_damage"):
+			_player.take_damage(laser_shots_damage)
+			_laser_shot_has_damaged = true
+
 func _trigger_attack_anim() -> void:
 	if sprite and not _is_attacking_anim:
 		_is_attacking_anim = true
 		sprite.play("attack")
 		sprite.frame = 0
+		# Fallback: garante que o estado é liberado mesmo se animation_finished não disparar
+		get_tree().create_timer(attack_anim_duration).timeout.connect(_end_attack_anim, CONNECT_ONE_SHOT)
+
+func _end_attack_anim() -> void:
+	_is_attacking_anim = false
+
 # ---------------------------------------------------------
 # GERENCIAMENTO DOS METEOROS
 # ---------------------------------------------------------
@@ -348,6 +496,31 @@ func _draw() -> void:
 				else:
 					draw_dashed_line(Vector2.ZERO, to, Color(1.0, 0.2, 0.2, 0.7), 2.0, 10.0, true, true)
 
+	if current_pattern_b == PatternB.LASER_SHOTS:
+		match _laser_shot_phase:
+			LaserShotPhase.AIMING:
+				var progress := 1.0 - (_laser_shot_timer / laser_shots_telegraph_duration)
+				var elapsed := laser_shots_telegraph_duration - _laser_shot_timer
+
+				var blink_freq: float = lerpf(2.0, 14.0, progress)
+				var blink := 0.5 + 0.5 * sin(elapsed * TAU * blink_freq)
+
+				var base_alpha := 0.25 + 0.55 * progress
+				var alpha: float = base_alpha * lerpf(0.4, 1.0, blink)
+
+				var col := Color(1.0, 0.2, 0.2, alpha)
+				var to := _laser_shot_dir * laser_shots_range
+
+				draw_dashed_line(Vector2.ZERO, to, col, 2.0, 10.0, true, true)
+
+				var perp := Vector2(-_laser_shot_dir.y, _laser_shot_dir.x) * (laser_shots_width * 0.5)
+				var band_col := Color(1.0, 0.2, 0.2, alpha * 0.25)
+				var points := PackedVector2Array([-perp, to - perp, to + perp, perp])
+				draw_colored_polygon(points, band_col)
+
+			LaserShotPhase.FIRING:
+				draw_line(Vector2.ZERO, _laser_shot_dir * laser_shots_range, Color(1.0, 0.9, 0.3, 0.9), laser_shots_width)
+
 	for m in _active_mortars:
 		var local_pos = to_local(m["pos"])
 		var progress = 1.0 - (m["timer"] / m["max_time"]) 
@@ -377,7 +550,7 @@ func _spawn_windmill_ring(ring_index: int) -> void:
 		p.position = dir * (start_offset + ring_index * spacing)
 		
 		if p is KnockbackProjectile: p.setup(dir, 0.0, knockback_force)
-		elif p.has_method("setup"): p.setup(dir, 0.0, normal_damage, pattern_duration, normal_color)
+		elif p.has_method("setup"): p.setup(dir, 0.0, normal_damage, pattern_duration_a, normal_color)
 
 func _fire_radial() -> void:
 	var proj_count = 18
@@ -420,6 +593,11 @@ func _fire_shotgun() -> void:
 			var target_pos = global_position + dir_to_player * shotgun_pickup_distance
 			var tween = create_tween()
 			tween.tween_property(pickup, "global_position", target_pos, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+	
+	# Reinicia o contador ao passar do último valor da lista, para o caso de o padrão
+	# ficar ativo por mais de uma janela de shotgun_pickup_bursts
+	if not shotgun_pickup_bursts.is_empty() and _shotgun_burst_count >= shotgun_pickup_bursts[shotgun_pickup_bursts.size() - 1]:
+		_shotgun_burst_count = 0
 
 func _fire_star() -> void:
 	var arms = 5 

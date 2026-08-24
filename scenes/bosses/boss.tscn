@@ -134,6 +134,8 @@ windmill_projectile = ExtResource("2_tsxae")
 meteor_projectile = ExtResource("2_tsxae")
 cleaning_pickup_scene = ExtResource("3_tsxae")
 pattern_a_order = Array[int]([0, 4, 3, 1, 2])
+pattern_order_mode_a = 1
+pattern_order_mode_b = 1
 data = ExtResource("4_tsxae")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2127671049]

@@ -1,16 +1,10 @@
 [gd_scene format=3 uid="uid://bnqqk7o4wybut"]
 
 [ext_resource type="Script" uid="uid://lprbl8cr52yn" path="res://scripts/enemies/dasher.gd" id="1_jhw8m"]
-[ext_resource type="Shader" uid="uid://bbb62mp6pn8kf" path="res://scenes/player/enemy.gdshader" id="2_dmxba"]
 [ext_resource type="Texture2D" uid="uid://bkqw4vgqibg8f" path="res://assets/sprites/dasher/Attack.png" id="2_riqeg"]
 [ext_resource type="Texture2D" uid="uid://bxj4mmagarhhv" path="res://assets/sprites/dasher/Hurt.png" id="3_dmxba"]
 [ext_resource type="Texture2D" uid="uid://d2e8mmmpyvkmu" path="res://assets/sprites/dasher/Idle.png" id="3_l5b5c"]
 [ext_resource type="Texture2D" uid="uid://c5ev8lv8c6pn5" path="res://assets/sprites/dasher/Walk.png" id="4_dmxba"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_8d6vt"]
-shader = ExtResource("2_dmxba")
-shader_parameter/flash_color = Color(0.56, 0, 1, 1)
-shader_parameter/flash_modifier = 0.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_b5cla"]
 atlas = ExtResource("2_riqeg")
@@ -110,7 +104,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"hurt",
-"speed": 12.0
+"speed": 24.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -151,6 +145,5 @@ animations = [{
 script = ExtResource("1_jhw8m")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=136465195]
-material = SubResource("ShaderMaterial_8d6vt")
 sprite_frames = SubResource("SpriteFrames_jhw8m")
-animation = &"attack"
+animation = &"hurt"

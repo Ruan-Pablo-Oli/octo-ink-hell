@@ -2,15 +2,9 @@
 
 [ext_resource type="Script" uid="uid://dxqk6nvqnekrd" path="res://scripts/enemies/laser_shooter.gd" id="1_t32l6"]
 [ext_resource type="Texture2D" uid="uid://xdejasvi0yg0" path="res://assets/sprites/laser/Attack.png" id="2_5n2qb"]
-[ext_resource type="Shader" uid="uid://bbb62mp6pn8kf" path="res://scenes/player/enemy.gdshader" id="2_vrs17"]
 [ext_resource type="Texture2D" uid="uid://cyiga8ctq8whm" path="res://assets/sprites/laser/Hurt.png" id="3_vrs17"]
 [ext_resource type="Texture2D" uid="uid://dh78bchamepty" path="res://assets/sprites/laser/Idle.png" id="4_372yi"]
 [ext_resource type="Texture2D" uid="uid://csu8pynqb1fa" path="res://assets/sprites/laser/Walk.png" id="5_2lbte"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_k5woo"]
-shader = ExtResource("2_vrs17")
-shader_parameter/flash_color = Color(0.56, 0, 1, 1)
-shader_parameter/flash_modifier = 0.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ynm80"]
 atlas = ExtResource("2_5n2qb")
@@ -126,7 +120,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"hurt",
-"speed": 12.0
+"speed": 24.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -179,6 +173,5 @@ animations = [{
 script = ExtResource("1_t32l6")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1855840733]
-material = SubResource("ShaderMaterial_k5woo")
 sprite_frames = SubResource("SpriteFrames_pcus6")
-animation = &"attack"
+animation = &"hurt"

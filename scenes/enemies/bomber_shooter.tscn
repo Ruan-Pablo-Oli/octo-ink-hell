@@ -2,15 +2,9 @@
 
 [ext_resource type="Script" uid="uid://bam6tg4igkh8p" path="res://scripts/enemies/bomb_shooter.gd" id="1_cs7cs"]
 [ext_resource type="Texture2D" uid="uid://duclg8qhvnf26" path="res://assets/sprites/bomber/Attack.png" id="2_f5g41"]
-[ext_resource type="Shader" uid="uid://bbb62mp6pn8kf" path="res://scenes/player/enemy.gdshader" id="2_le4qv"]
 [ext_resource type="Texture2D" uid="uid://dv3mloke5ypop" path="res://assets/sprites/bomber/Hurt.png" id="3_le4qv"]
 [ext_resource type="Texture2D" uid="uid://5pg6swbvgwne" path="res://assets/sprites/bomber/Idle.png" id="4_qej5l"]
 [ext_resource type="Texture2D" uid="uid://di0t53o66cdkb" path="res://assets/sprites/bomber/Walk.png" id="5_jdnny"]
-
-[sub_resource type="ShaderMaterial" id="ShaderMaterial_ew7b2"]
-shader = ExtResource("2_le4qv")
-shader_parameter/flash_color = Color(0.56, 0, 1, 1)
-shader_parameter/flash_modifier = 0.0
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_ng4ec"]
 atlas = ExtResource("2_f5g41")
@@ -99,7 +93,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"attack",
-"speed": 8.0
+"speed": 14.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -110,7 +104,7 @@ animations = [{
 }],
 "loop": 0,
 "name": &"hurt",
-"speed": 12.0
+"speed": 24.0
 }, {
 "frames": [{
 "duration": 1.0,
@@ -151,6 +145,5 @@ animations = [{
 script = ExtResource("1_cs7cs")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1359888197]
-material = SubResource("ShaderMaterial_ew7b2")
 sprite_frames = SubResource("SpriteFrames_pcus6")
-animation = &"hurt"
+animation = &"attack"
