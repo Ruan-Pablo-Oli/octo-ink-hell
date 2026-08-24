@@ -27,14 +27,16 @@ class_name Boss
 
 # --- CONFIGURAÇÕES DA ESCOPETA ---
 @export_group("Shotgun Settings")
-@export var shotgun_pickup_distance: float = 400.0 # Distância que o item desliza
-@export var shotgun_pickup_bursts: Array[int] = [1,4] # Em quais rajadas ele solta (ex: na 3ª rajada)
+@export var shotgun_pickup_distance: float = 400.0 
+@export var shotgun_pickup_bursts: Array[int] = [1, 4] 
 
+# --- CONTROLE VISUAL ---
+@export_group("Visuals")
+## Controla o tamanho do sprite do Boss no Inspector
+@export var sprite_scale: Vector2 = Vector2(2.5, 2.5) 
 
-# Adicione isso perto dos outros preloads (se houver) ou das export variables
 const BossHealthOverlayScript := preload("res://scripts/ui/boss_health_overlay.gd")
 
-# (Coloque esta variável junto com as outras variáveis de estado, como _star_angle)
 var _shotgun_burst_count: int = 0
 
 # --- DIVISÃO DOS GRUPOS DE ATAQUE ---
@@ -45,8 +47,6 @@ var current_pattern_a: PatternA = PatternA.IDLE
 var current_pattern_b: PatternB = PatternB.IDLE
 
 var pattern_timer := 0.0
-
-# Precisamos de timers independentes para cada grupo!
 var shoot_timer_a := 0.0
 var shoot_timer_b := 0.0
 
@@ -67,18 +67,18 @@ func _ready() -> void:
 	super() 
 	_center_pos = global_position
 	
-	# Cria a barra de vida (Você pode alterar o nome do boss aqui)
-	var health_bar = BossHealthOverlayScript.new(self, data.display_name)
+	if sprite:
+		sprite.scale = sprite_scale
+		sprite.play("idle")
 	
-	# Adiciona a barra à tela principal (para que ela não se mova com a câmera/boss)
+	var health_bar = BossHealthOverlayScript.new(self, data.display_name if data else "Anomalia Principal")
 	get_tree().current_scene.add_child(health_bar)
-	
 
 func _load_default_data() -> void:
 	if data == null:
 		data = preload("res://resources/enemies/boss.tres")
 
-func apply_knockback(dir: Vector2, force: float) -> void:
+func apply_knockback(_dir: Vector2, _force: float) -> void:
 	pass
 
 func _move(delta: float) -> void:
@@ -86,15 +86,26 @@ func _move(delta: float) -> void:
 	global_position = _center_pos
 	
 	pattern_timer -= delta
-	
 	if pattern_timer <= 0.0:
 		_choose_next_patterns()
 		
-	# Agora executamos os dois grupos ao mesmo tempo!
 	_handle_group_a(delta)
 	_handle_group_b(delta)
-	
 	_update_mortars(delta)
+
+	# --- CONTROLE DAS ANIMAÇÕES BLINDADO ---
+	if sprite and _player:
+		var to_player_x := _player.global_position.x - global_position.x
+		if to_player_x != 0:
+			sprite.flip_h = to_player_x < 0
+			
+		var is_hurting = sprite.animation == "hurt" and sprite.is_playing()
+		var is_attacking = sprite.animation == "attack" and sprite.is_playing()
+		
+		if not is_hurting and not is_attacking:
+			sprite.play("idle")
+	# ----------------------------------------
+
 	queue_redraw()
 
 func _choose_next_patterns() -> void:
@@ -103,26 +114,17 @@ func _choose_next_patterns() -> void:
 		_windmill_pivot = null
 	
 	_shotgun_burst_count = 0 
-	# Sorteia um ataque do Grupo A (1 a 4)
 	current_pattern_a = (randi() % 4) as PatternA + 1 
-	
-	# Sorteia um ataque do Grupo B (1 a 2)
 	current_pattern_b = (randi() % 2) as PatternB + 1 
 	
 	pattern_timer = pattern_duration
-	
-	# Timer do A começa rápido (0.5s)
 	shoot_timer_a = 0.5 
-	
-	# Timer do B começa com o atraso que você definiu no Inspector!
 	shoot_timer_b = 0.5 + group_b_start_delay
 
-
 # ---------------------------------------------------------
-# EXECUÇÃO DO GRUPO A (Agora com o Windmill)
+# EXECUÇÃO DO GRUPO A (Sem animação de ataque)
 # ---------------------------------------------------------
 func _handle_group_a(delta: float) -> void:
-	# O Windmill roda todo frame para girar, então ele não usa o shoot_timer_a normal
 	if current_pattern_a == PatternA.WINDMILL:
 		if _windmill_pivot == null:
 			_windmill_pivot = Node2D.new()
@@ -137,9 +139,8 @@ func _handle_group_a(delta: float) -> void:
 			_spawn_windmill_ring(_windmill_bullet_index)
 			_windmill_bullet_index += 1
 			_windmill_spawn_timer = 0.15 
-		return # Encerra aqui para não travar no timer abaixo
+		return 
 		
-	# Lógica dos outros tiros diretos
 	shoot_timer_a -= delta
 	if shoot_timer_a > 0.0:
 		return
@@ -156,7 +157,7 @@ func _handle_group_a(delta: float) -> void:
 			shoot_timer_a = 0.15
 
 # ---------------------------------------------------------
-# EXECUÇÃO DO GRUPO B (Agora com Escopeta e Meteoro)
+# EXECUÇÃO DO GRUPO B (Com animação de ataque)
 # ---------------------------------------------------------
 func _handle_group_b(delta: float) -> void:
 	shoot_timer_b -= delta
@@ -165,16 +166,22 @@ func _handle_group_b(delta: float) -> void:
 		
 	match current_pattern_b:
 		PatternB.METEOR:
+			_trigger_attack_anim()
 			_fire_meteor()
 			shoot_timer_b = 1.0
 		PatternB.SHOTGUN:
+			_trigger_attack_anim()
 			_fire_shotgun()
-			shoot_timer_b = 1.0 # Cadência da escopeta
+			shoot_timer_b = 1.0
+
+func _trigger_attack_anim() -> void:
+	if sprite:
+		sprite.play("attack")
+		sprite.frame = 0
 
 # ---------------------------------------------------------
 # GERENCIAMENTO DOS METEOROS
 # ---------------------------------------------------------
-
 func _fire_meteor() -> void:
 	if _player == null: return
 		
@@ -206,19 +213,17 @@ func _explode_mortar(pos: Vector2) -> void:
 		var pickup = cleaning_pickup_scene.instantiate()
 		entities.add_child(pickup)
 		pickup.global_position = pos
-	# ----------------------------------------------------
 
-	# Lógica que já existia para as balas do meteoro
 	var proj_count = 10
 	for i in proj_count:
 		var angle = (float(i) / proj_count) * TAU
 		var dir = Vector2.RIGHT.rotated(angle)
 		_spawn_projectile_at(pos, dir, meteor_projectile)
+
 # ---------------------------------------------------------
-# DESENHANDO O AVISO VISUAL (TELEGRAPH)
+# DESENHANDO O AVISO VISUAL (TELEGRAPH) DOS METEOROS
 # ---------------------------------------------------------
 func _draw() -> void:
-	super()
 	for m in _active_mortars:
 		var local_pos = to_local(m["pos"])
 		var progress = 1.0 - (m["timer"] / m["max_time"]) 
@@ -233,7 +238,6 @@ func _draw() -> void:
 # ---------------------------------------------------------
 # OUTROS PADRÕES E SPAWNS
 # ---------------------------------------------------------
-
 func _spawn_windmill_ring(ring_index: int) -> void:
 	var arms = 4
 	var spacing = 45.0 
@@ -266,21 +270,19 @@ func _fire_spiral() -> void:
 	_spawn_projectile(dir_oposta, spiral_projectile)
 
 func _fire_shotgun() -> void:
-	_shotgun_burst_count += 1 # Soma +1 toda vez que atira
+	_shotgun_burst_count += 1 
 	
 	var proj_count = 7
 	var spread_angle = PI / 4.0 
 	var dir_to_player = (_player.global_position - global_position).normalized()
 	var base_angle = dir_to_player.angle()
 	
-	# 1. Atira as balas normais da escopeta
 	for i in proj_count:
 		var t = float(i) / float(proj_count - 1)
 		var offset = lerpf(-spread_angle / 2.0, spread_angle / 2.0, t)
 		var final_dir = Vector2.RIGHT.rotated(base_angle + offset)
 		_spawn_projectile(final_dir, shotgun_projectile)
 		
-	# 2. Verifica se a rajada atual está na lista permitida para soltar o item
 	if _shotgun_burst_count in shotgun_pickup_bursts:
 		if cleaning_pickup_scene != null:
 			var entities := get_tree().get_first_node_in_group("entities")
@@ -289,16 +291,12 @@ func _fire_shotgun() -> void:
 				
 			var pickup = cleaning_pickup_scene.instantiate()
 			entities.add_child(pickup)
-			
-			# O item nasce no Boss
 			pickup.global_position = global_position
 			
-			# Usa a nova variável de distância configurável no Inspector
 			var target_pos = global_position + dir_to_player * shotgun_pickup_distance
-			
-			# Cria a animação de arremesso (Tween)
 			var tween = create_tween()
 			tween.tween_property(pickup, "global_position", target_pos, 0.6).set_trans(Tween.TRANS_QUAD).set_ease(Tween.EASE_OUT)
+
 func _fire_star() -> void:
 	var arms = 5 
 	_star_angle += 0.15 

@@ -10,6 +10,10 @@ class_name BomberShooter
 
 const EnemyBombScene := preload("res://scenes/combat/enemyBomb.tscn")
 
+# --- CONTROLE VISUAL ---
+@export_group("Visuals")
+@export var sprite_scale: Vector2 = Vector2(1.9, 1.9) 
+
 enum State { IDLE, WINDUP }
 
 var _state: State = State.IDLE
@@ -19,6 +23,12 @@ func _load_default_data() -> void:
 	if data == null:
 		data = preload("res://resources/enemies/bomber_shooter.tres")
 	_state_timer = randf_range(throw_cooldown_min, throw_cooldown_max)
+
+func _ready() -> void:
+	super()
+	if sprite:
+		sprite.scale = sprite_scale
+		sprite.play("idle")
 
 func _move(delta: float) -> void:
 	match _state:
@@ -31,18 +41,36 @@ func _move(delta: float) -> void:
 			velocity = Vector2.ZERO
 			_state_timer -= delta
 			if _state_timer <= 0.0:
-				_throw_bomb()
+				_throw_bomb() # O tiro/bomba sai aqui
 				_state = State.IDLE
 				_state_timer = randf_range(throw_cooldown_min, throw_cooldown_max)
+				
+	queue_redraw()
+
+	# --- CONTROLE DAS ANIMAÇÕES BLINDADO ---
+	if sprite:
+		var to_player_x := _player.global_position.x - global_position.x
+		sprite.flip_h = to_player_x < 0
+		
+		var is_hurting = sprite.animation == "hurt" and sprite.is_playing()
+		var is_attacking = sprite.animation == "attack" and sprite.is_playing()
+		
+		if not is_hurting and not is_attacking:
+			if velocity.length() > 5.0:
+				sprite.play("walk")
+			else:
+				sprite.play("idle")
 
 func _move_idle() -> void:
 	var to_player := _player.global_position - global_position
 	var dist := to_player.length()
 	var dir := Vector2.ZERO
+	
 	if dist > preferred_distance + 40.0:
 		dir = to_player.normalized()
 	elif dist < preferred_distance - 40.0:
 		dir = -to_player.normalized()
+		
 	velocity = dir * data.move_speed
 
 func _start_windup() -> void:
@@ -53,18 +81,25 @@ func _start_windup() -> void:
 func _throw_bomb() -> void:
 	if _player == null or not is_instance_valid(_player):
 		return
+		
+	# A ANIMAÇÃO DE ATAQUE COMEÇA EXATAMENTE AQUI, NO MOMENTO EM QUE A BOMBA É LANÇADA
+	if sprite:
+		sprite.play("attack")
+		sprite.frame = 0
+		
 	var entities := get_tree().get_first_node_in_group("entities")
 	if entities == null:
 		entities = get_tree().current_scene
+		
 	var scatter_dir := Vector2.RIGHT.rotated(randf() * TAU)
 	var scatter_dist: float = randf_range(scatter_min, scatter_max)
 	var target: Vector2 = _player.global_position + scatter_dir * scatter_dist
+	
 	var bomb := EnemyBombScene.instantiate()
 	entities.add_child(bomb)
 	bomb.setup(global_position, target)
 
 func _draw() -> void:
-	super._draw()
 	if _state == State.WINDUP:
 		var progress: float = 1.0 - (_state_timer / windup_duration)
 		var c := Color(1.0, 0.6, 0.1, 0.3 + 0.5 * progress)

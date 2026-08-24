@@ -29,9 +29,7 @@ const DANGER_COLOR := Color(0.55, 0.20, 0.25)
 # IMAGES
 # ============================================================
 
-const BACKGROUND_TEXTURE := preload(
-	"res://assets/ui/menu_background.jpg"
-)
+
 
 const LOGO_TEXTURE := preload(
 	"res://assets/ui/menu_logo.png"
@@ -164,7 +162,6 @@ func _build_background() -> void:
 
 	_background.name = "Background"
 
-	_background.texture = BACKGROUND_TEXTURE
 
 	_background.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 

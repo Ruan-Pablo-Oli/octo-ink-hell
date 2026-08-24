@@ -1,6 +1,170 @@
 [gd_scene format=3 uid="uid://b5id3shtj23k"]
 
 [ext_resource type="Script" uid="uid://by584t1yvno8s" path="res://scripts/enemies/swarmer.gd" id="1"]
+[ext_resource type="Shader" uid="uid://bbb62mp6pn8kf" path="res://scenes/player/enemy.gdshader" id="2_bvuyf"]
+[ext_resource type="Texture2D" uid="uid://do8l4r767l3c" path="res://assets/sprites/swarmer/Attack.png" id="2_t6qv1"]
+[ext_resource type="Texture2D" uid="uid://gwn7yt8s5mp" path="res://assets/sprites/swarmer/Hurt.png" id="3_bvuyf"]
+[ext_resource type="Texture2D" uid="uid://bh7xig7o3y03k" path="res://assets/sprites/swarmer/Idle.png" id="4_ddril"]
+[ext_resource type="Texture2D" uid="uid://37c413dykpnf" path="res://assets/sprites/swarmer/Walk.png" id="5_u2x4u"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_t6qv1"]
+shader = ExtResource("2_bvuyf")
+shader_parameter/flash_color = Color(0.56, 0, 1, 1)
+shader_parameter/flash_modifier = 0.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_fsfn2"]
+atlas = ExtResource("2_t6qv1")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_uwnxu"]
+atlas = ExtResource("2_t6qv1")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_16sib"]
+atlas = ExtResource("2_t6qv1")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ayh7f"]
+atlas = ExtResource("2_t6qv1")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_g6d86"]
+atlas = ExtResource("2_t6qv1")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_v2mao"]
+atlas = ExtResource("2_t6qv1")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_kmilg"]
+atlas = ExtResource("3_bvuyf")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_263qb"]
+atlas = ExtResource("3_bvuyf")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7hchl"]
+atlas = ExtResource("4_ddril")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_hhuqu"]
+atlas = ExtResource("4_ddril")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_56qkg"]
+atlas = ExtResource("4_ddril")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_tvyoq"]
+atlas = ExtResource("4_ddril")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_qi1ta"]
+atlas = ExtResource("5_u2x4u")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ohxxc"]
+atlas = ExtResource("5_u2x4u")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_b8do1"]
+atlas = ExtResource("5_u2x4u")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_vc0kb"]
+atlas = ExtResource("5_u2x4u")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ek5lq"]
+atlas = ExtResource("5_u2x4u")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bq4ae"]
+atlas = ExtResource("5_u2x4u")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pcus6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_fsfn2")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_uwnxu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_16sib")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ayh7f")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_g6d86")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_v2mao")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 5.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_kmilg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_263qb")
+}],
+"loop": 0,
+"name": &"hurt",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7hchl")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_hhuqu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_56qkg")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_tvyoq")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_qi1ta")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ohxxc")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_b8do1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_vc0kb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ek5lq")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bq4ae")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
 
 [node name="Swarmer" type="CharacterBody2D" unique_id=1490500900]
 script = ExtResource("1")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=1190003329]
+material = SubResource("ShaderMaterial_t6qv1")
+sprite_frames = SubResource("SpriteFrames_pcus6")
+animation = &"hurt"

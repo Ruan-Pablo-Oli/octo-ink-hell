@@ -4,6 +4,125 @@
 [ext_resource type="PackedScene" uid="uid://va1206d6pe4d" path="res://scenes/combat/enemyProjectile.tscn" id="2_tsxae"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/cleaning_item.tscn" id="3_tsxae"]
 [ext_resource type="Resource" uid="uid://pb30s7lesr61" path="res://resources/enemies/boss.tres" id="4_tsxae"]
+[ext_resource type="Texture2D" uid="uid://xdejasvi0yg0" path="res://assets/sprites/laser/Attack.png" id="5_u0mjr"]
+[ext_resource type="Texture2D" uid="uid://cyiga8ctq8whm" path="res://assets/sprites/laser/Hurt.png" id="6_gvr6f"]
+[ext_resource type="Texture2D" uid="uid://dh78bchamepty" path="res://assets/sprites/laser/Idle.png" id="7_i2v44"]
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_r7ieo"]
+atlas = ExtResource("5_u0mjr")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_e1y6n"]
+atlas = ExtResource("5_u0mjr")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_dvnec"]
+atlas = ExtResource("5_u0mjr")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ulg6o"]
+atlas = ExtResource("5_u0mjr")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_65xm1"]
+atlas = ExtResource("5_u0mjr")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ahjmb"]
+atlas = ExtResource("5_u0mjr")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_irv61"]
+atlas = ExtResource("6_gvr6f")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_lciyy"]
+atlas = ExtResource("6_gvr6f")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_34uml"]
+atlas = ExtResource("7_i2v44")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_plwxb"]
+atlas = ExtResource("7_i2v44")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_poibd"]
+atlas = ExtResource("7_i2v44")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_bhebu"]
+atlas = ExtResource("7_i2v44")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_01oib"]
+atlas = ExtResource("7_i2v44")
+region = Rect2(192, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_krs8l"]
+atlas = ExtResource("7_i2v44")
+region = Rect2(240, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pcus6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_r7ieo")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_e1y6n")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_dvnec")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ulg6o")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_65xm1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ahjmb")
+}],
+"loop": 1,
+"name": &"attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_irv61")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_lciyy")
+}],
+"loop": 1,
+"name": &"hurt",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_34uml")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_plwxb")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_poibd")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_bhebu")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_01oib")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_krs8l")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 12.0
+}]
 
 [node name="Boss" type="CharacterBody2D" unique_id=1918130495]
 script = ExtResource("1_buxl7")
@@ -15,3 +134,7 @@ windmill_projectile = ExtResource("2_tsxae")
 meteor_projectile = ExtResource("2_tsxae")
 cleaning_pickup_scene = ExtResource("3_tsxae")
 data = ExtResource("4_tsxae")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2127671049]
+sprite_frames = SubResource("SpriteFrames_pcus6")
+animation = &"idle"

@@ -1,6 +1,144 @@
 [gd_scene format=3 uid="uid://co6bp3k64l8x"]
 
 [ext_resource type="Script" uid="uid://0juhuhfuhra4" path="res://scripts/enemies/shooter.gd" id="1_tuqsv"]
+[ext_resource type="Texture2D" uid="uid://cfw64g218xfur" path="res://assets/sprites/shooter/Attack.png" id="2_onxcn"]
+[ext_resource type="Resource" uid="uid://bg8ndlskn4ldy" path="res://resources/enemies/shooter.tres" id="2_yif4x"]
+[ext_resource type="Shader" uid="uid://bbb62mp6pn8kf" path="res://scenes/player/enemy.gdshader" id="3_w3u7i"]
+[ext_resource type="Texture2D" uid="uid://4gdwh0klasmk" path="res://assets/sprites/shooter/Idle.png" id="3_yif4x"]
+[ext_resource type="Texture2D" uid="uid://dic1apm08cmqp" path="res://assets/sprites/shooter/Walk.png" id="4_vqk60"]
+[ext_resource type="Texture2D" uid="uid://udfo00wfqyvl" path="res://assets/sprites/shooter/Hurt.png" id="4_w3u7i"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_yif4x"]
+shader = ExtResource("3_w3u7i")
+shader_parameter/flash_color = Color(0.56, 0, 1, 1)
+shader_parameter/flash_modifier = 0.0
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_p85bh"]
+atlas = ExtResource("2_onxcn")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_7wji0"]
+atlas = ExtResource("2_onxcn")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_5qjbe"]
+atlas = ExtResource("2_onxcn")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_w3u7i"]
+atlas = ExtResource("2_onxcn")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_urtfj"]
+atlas = ExtResource("4_w3u7i")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_cdciw"]
+atlas = ExtResource("4_w3u7i")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aoqnf"]
+atlas = ExtResource("3_yif4x")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_pdait"]
+atlas = ExtResource("3_yif4x")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_rxpk1"]
+atlas = ExtResource("3_yif4x")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_wne2l"]
+atlas = ExtResource("3_yif4x")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_ig32u"]
+atlas = ExtResource("4_vqk60")
+region = Rect2(0, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_8r1gr"]
+atlas = ExtResource("4_vqk60")
+region = Rect2(48, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_aop7g"]
+atlas = ExtResource("4_vqk60")
+region = Rect2(144, 0, 48, 48)
+
+[sub_resource type="AtlasTexture" id="AtlasTexture_o1mn1"]
+atlas = ExtResource("4_vqk60")
+region = Rect2(96, 0, 48, 48)
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_pcus6"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_p85bh")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_7wji0")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_5qjbe")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_w3u7i")
+}],
+"loop": 0,
+"name": &"attack",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_urtfj")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_cdciw")
+}],
+"loop": 0,
+"name": &"hurt",
+"speed": 12.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aoqnf")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_pdait")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_rxpk1")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_wne2l")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 8.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_ig32u")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_8r1gr")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_aop7g")
+}, {
+"duration": 1.0,
+"texture": SubResource("AtlasTexture_o1mn1")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]
 
 [node name="Shooter" type="CharacterBody2D" unique_id=2084239633]
 script = ExtResource("1_tuqsv")
+data = ExtResource("2_yif4x")
+
+[node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=342270976]
+material = SubResource("ShaderMaterial_yif4x")
+sprite_frames = SubResource("SpriteFrames_pcus6")
+animation = &"attack"

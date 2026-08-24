@@ -16,7 +16,7 @@ const SPAWN_MARGIN := 40.0
 
 # --- NOVO: CONFIGURAÇÕES DO BOSS ---
 @export_group("Boss Battle")
-@export var final_wave: int = 6
+@export var final_wave: int = 10
 @export var boss_scene:= preload("res://scenes/bosses/boss.tscn")
 
 @export_group("Wave Settings")
