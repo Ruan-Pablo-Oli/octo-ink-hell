@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1_bjs2n")
 display_name = "Empurrador"
-body_color = Color(0.1374371, 0.5420668, 0.93656677, 1)
+body_color = Color(0.66495883, 0.4673522, 0.39630565, 1)

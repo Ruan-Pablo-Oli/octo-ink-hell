@@ -1,14 +1,8 @@
-[gd_resource type="Resource" script_class="EnemyData" load_steps=2 format=3]
+[gd_resource type="Resource" script_class="EnemyData" format=3 uid="uid://da1x8768ffq43"]
 
-[ext_resource type="Script" path="res://resources/enemy_data.gd" id="1"]
+[ext_resource type="Script" uid="uid://8twel2doh3k1" path="res://resources/enemy_data.gd" id="1"]
 
 [resource]
 script = ExtResource("1")
 display_name = "Enxameador"
-max_health = 20.0
-move_speed = 120.0
-contact_damage = 8.0
-xp_value = 1
-clean_drop_chance = 0.10
-body_color = Color(0.9, 0.45, 0.15, 1.0)
-body_radius = 14.0
+body_color = Color(0, 0.5642932, 0.54264426, 1)

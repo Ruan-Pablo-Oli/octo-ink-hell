@@ -5,4 +5,4 @@
 [resource]
 script = ExtResource("1")
 display_name = "Atirador"
-body_color = Color(2.2140146e-06, 0.694925, 0.5672074, 1)
+body_color = Color(0, 0.39342096, 0.70506907, 1)
