@@ -28,7 +28,6 @@ func _ready() -> void:
 	if sprite:
 		sprite.animation_finished.connect(_on_animation_finished)
 		# Deixa o sprite com um tom azulado forte (R: 0.3, G: 0.6, B: 1.0, A: 1.0)
-		sprite.modulate = Color(0.0, 0.384, 0.788, 0.8)
 	
 	collision_layer = HITTABLE_LAYER | _physics_collision_layer()
 	collision_mask = _physics_collision_mask()

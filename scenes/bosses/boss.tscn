@@ -4,9 +4,18 @@
 [ext_resource type="PackedScene" uid="uid://va1206d6pe4d" path="res://scenes/combat/enemyProjectile.tscn" id="2_tsxae"]
 [ext_resource type="PackedScene" path="res://scenes/pickups/cleaning_item.tscn" id="3_tsxae"]
 [ext_resource type="Resource" uid="uid://pb30s7lesr61" path="res://resources/enemies/boss.tres" id="4_tsxae"]
+[ext_resource type="Shader" uid="uid://cbclp3fae0j6" path="res://scenes/bosses/boss.gdshader" id="5_gvr6f"]
 [ext_resource type="Texture2D" uid="uid://xdejasvi0yg0" path="res://assets/sprites/laser/Attack.png" id="5_u0mjr"]
 [ext_resource type="Texture2D" uid="uid://cyiga8ctq8whm" path="res://assets/sprites/laser/Hurt.png" id="6_gvr6f"]
 [ext_resource type="Texture2D" uid="uid://dh78bchamepty" path="res://assets/sprites/laser/Idle.png" id="7_i2v44"]
+
+[sub_resource type="ShaderMaterial" id="ShaderMaterial_gvr6f"]
+shader = ExtResource("5_gvr6f")
+shader_parameter/r_mux = Vector4(0.15, 0, 0.2, 0)
+shader_parameter/g_mux = Vector4(0, 0, 0.02, 0)
+shader_parameter/b_mux = Vector4(0.2, 0, 0.3, 0)
+shader_parameter/a_mux = Vector4(0, 0, 0, 1)
+shader_parameter/add_color = Vector4(0, 0, 0, 0)
 
 [sub_resource type="AtlasTexture" id="AtlasTexture_r7ieo"]
 atlas = ExtResource("5_u0mjr")
@@ -139,5 +148,6 @@ pattern_order_mode_b = 1
 data = ExtResource("4_tsxae")
 
 [node name="AnimatedSprite2D" type="AnimatedSprite2D" parent="." unique_id=2127671049]
+material = SubResource("ShaderMaterial_gvr6f")
 sprite_frames = SubResource("SpriteFrames_pcus6")
 animation = &"idle"

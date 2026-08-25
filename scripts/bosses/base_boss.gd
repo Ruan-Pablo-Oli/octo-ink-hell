@@ -78,7 +78,7 @@ enum PatternOrderMode { FIXED, RANDOM }
 
 # --- CONTROLE VISUAL ---
 @export_group("Visuals")
-@export var sprite_scale: Vector2 = Vector2(2.5, 2.5) 
+@export var sprite_scale: Vector2 = Vector2(2.7, 2.7) 
 
 const BossHealthOverlayScript := preload("res://scripts/ui/boss_health_overlay.gd")
 
